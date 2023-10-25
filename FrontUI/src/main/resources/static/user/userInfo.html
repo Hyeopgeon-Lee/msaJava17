@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>회원정보 보기</title>
+    <link rel="stylesheet" href="/css/table.css"/>
+    <script type="text/javascript" src="/js/common.js"></script>
+    <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+
+        // HTML로딩이 완료되고, 실행됨
+        $(document).ready(function () {
+            // 로그아웃
+            $("#btnLogout").on("click", function () { // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
+                location.href = "/user/logout";
+            })
+
+            // 회원정보 상세 조회하기
+            $.ajax({ // Ajax 호출
+                url: "http://" + apiServer + "/user/userInfo",
+                type: "post", // 전송방식은 Post
+                xhrFields: { // CORS 문제를 해결하기 위해 인증 Credentials 정보를 전달(서버쪽도 반드시 설정되어야 함)
+                    withCredentials: true
+                },
+                dataType: "JSON", // 전송 결과는 JSON으로 받기
+                success: function (json) { // Ajax 요청이 성공했다면...
+                    $("#userId").append(json.userId);
+                    $("#userName").append(json.userName);
+                    $("#email").append(json.email);
+                    $("#addr1").append(json.addr1);
+                    $("#addr2").append(json.addr2);
+                },
+                // error: function (request, status, error) {
+                error: function () {
+                    alert("접근 권한이 없습니다.");
+                    location.href = loginPage;
+
+                }
+            })
+        })
+    </script>
+</head>
+<body>
+<h2>회원정보 상세 보기</h2>
+<hr/>
+<br/>
+<div class="divTable minimalistBlack">
+    <div class="divTableBody">
+        <div class="divTableRow">
+            <div class="divTableCell">아이디</div>
+            <div class="divTableCell" id="userId"></div>
+        </div>
+        <div class="divTableRow">
+            <div class="divTableCell">이름</div>
+            <div class="divTableCell" id="userName"></div>
+        </div>
+        <div class="divTableRow">
+            <div class="divTableCell">이메일</div>
+            <div class="divTableCell" id="email"></div>
+        </div>
+        <div class="divTableRow">
+            <div class="divTableCell">주소</div>
+            <div class="divTableCell" id="addr1"></div>
+        </div>
+        <div class="divTableRow">
+            <div class="divTableCell">상세 주소</div>
+            <div class="divTableCell" id="addr2"></div>
+        </div>
+    </div>
+</div>
+<br/>
+<div>
+    <button id="btnLogout" type="button">로그아웃</button>
+</div>
+</body>
+</html>

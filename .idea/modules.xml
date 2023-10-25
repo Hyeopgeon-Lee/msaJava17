@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ApiGateway.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ApiGateway.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/NoticeService.main.iml" filepath="$PROJECT_DIR$/.idea/modules/NoticeService.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/UserService.main.iml" filepath="$PROJECT_DIR$/.idea/modules/UserService.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/msaJava17.iml" filepath="$PROJECT_DIR$/msaJava17.iml" />
+    </modules>
+  </component>
+</project>

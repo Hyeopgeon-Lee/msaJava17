@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>회원가입 화면</title>
+    <link rel="stylesheet" href="/css/table.css"/>
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+    <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+
+        // HTML로딩이 완료되고, 실행됨
+        $(document).ready(function () {
+
+            let f = document.getElementById("f"); // form 태그
+
+            // html의 btnSend id의 버튼 객체 가져오기
+            const btnSend = document.getElementById("btnSend");
+
+            // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
+            btnSend.addEventListener("click", e => {
+                doSubmit(f); // 회원가입하기
+            })
+
+            // html의 btnAddr id의 버튼 객체 가져오기
+            const btnAddr = document.getElementById("btnAddr"); // 카카오 주소 조회
+
+            // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
+            btnAddr.addEventListener("click", e => {
+                kakaoPost(f); // 카카오 주소 조회하기
+            })
+
+        })
+
+        //회원가입 정보의 유효성 체크하기
+        function doSubmit(f) {
+
+            if (f.user_id.value === "") {
+                alert("아이디를 입력하세요.");
+                f.user_id.focus();
+                return;
+            }
+
+            if (f.user_name.value === "") {
+                alert("이름을 입력하세요.");
+                f.user_name.focus();
+                return;
+            }
+
+            if (f.password.value === "") {
+                alert("비밀번호를 입력하세요.");
+                f.password.focus();
+                return;
+            }
+
+            if (f.password2.value === "") {
+                alert("비밀번호확인을 입력하세요.");
+                f.password2.focus();
+                return;
+            }
+
+            if (f.password.value !== f.password2.value) {
+                alert("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+                f.password.focus();
+                return;
+            }
+
+            if (f.email.value === "") {
+                alert("이메일을 입력하세요.");
+                f.email.focus();
+                return;
+            }
+
+            if (f.addr1.value === "") {
+                alert("주소를 입력하세요.");
+                f.addr1.focus();
+                return;
+            }
+
+            if (f.addr2.value === "") {
+                alert("상세주소를 입력하세요.");
+                f.addr2.focus();
+                return;
+            }
+
+            // Ajax 호출해서 회원가입하기
+            $.ajax({
+                    url: "http://" + apiServer + "/reg/insertUserInfo",
+                    type: "post", // 전송방식은 Post
+                    dataType: "JSON", // 전송 결과는 JSON으로 받기
+                    data: $("#f").serialize(), // form 태그 내 input 등 객체를 자동으로 전송할 형태로 변경하기
+                    success: function (json) { // /notice/noticeUpdate 호출이 성공했다면..
+
+                        if (json.result === 1) { // 회원가입 성공
+                            alert(json.msg); // 메시지 띄우기
+                            location.href = "/ss/login.html"; // 로그인 페이지 이동
+
+                        } else { // 회원가입 실패
+                            alert(json.msg); // 메시지 띄우기
+                        }
+
+                    }
+                }
+            )
+        }
+
+        function kakaoPost(f) {
+            new daum.Postcode({
+                oncomplete: function (data) {
+
+                    // Kakao에서 제공하는 data는 JSON구조로 주소 조회 결과값을 전달함
+                    // 주요 결과값
+                    // 주소 : data.address
+                    // 우편번호 : data.zonecode
+                    let address = data.address; // 주소
+                    let zonecode = data.zonecode; // 우편번호
+                    f.addr1.value = "(" + zonecode + ")" + address
+                }
+            }).open();
+        }
+    </script>
+
+
+</head>
+<body>
+<h2>회원 가입하기</h2>
+<hr/>
+<br/>
+<form id="f">
+    <div class="divTable minimalistBlack">
+        <div class="divTableBody">
+            <div class="divTableRow">
+                <div class="divTableCell">* 아이디
+                </div>
+                <div class="divTableCell">
+                    <input type="text" name="user_id" style="width:95%"/>
+                </div>
+            </div>
+            <div class="divTableRow">
+                <div class="divTableCell">* 이름
+                </div>
+                <div class="divTableCell">
+                    <input type="text" name="user_name" style="width:95%"/>
+                </div>
+            </div>
+            <div class="divTableRow">
+                <div class="divTableCell">* 비밀번호
+                </div>
+                <div class="divTableCell">
+                    <input type="password" name="password" style="width:95%"/>
+                </div>
+            </div>
+            <div class="divTableRow">
+                <div class="divTableCell">* 비밀번호확인
+                </div>
+                <div class="divTableCell">
+                    <input type="password" name="password2" style="width:95%"/>
+                </div>
+            </div>
+            <div class="divTableRow">
+                <div class="divTableCell">* 이메일
+                </div>
+                <div class="divTableCell">
+                    <input type="email" name="email" style="width:95%"/>
+                </div>
+            </div>
+            <div class="divTableRow">
+                <div class="divTableCell">* 주소
+                </div>
+                <div class="divTableCell">
+                    <input type="text" name="addr1" style="width:85%"/>
+                    <input type="button" id="btnAddr" value="우편번호"/>
+                </div>
+            </div>
+            <div class="divTableRow">
+                <div class="divTableCell">* 상세 주소
+                </div>
+                <div class="divTableCell">
+                    <input type="text" name="addr2" style="width:95%"/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <input type="button" id="btnSend" value="회원가입"/>
+    </div>
+</form>
+</body>
+</html>

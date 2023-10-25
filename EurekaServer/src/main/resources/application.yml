@@ -1,0 +1,27 @@
+# Eureka Server Port
+server:
+  port: 8761
+
+# Eureka Server Name
+spring:
+  application:
+    name: discoverservice
+
+# Eureka Server
+eureka:
+  server:
+    enable-self-preservation: true
+    expected-client-renewal-interval-seconds: 100
+    eviction-interval-timer-in-ms: 600
+    renewal-percent-threshold: 0.85
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+
+# End Point
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+

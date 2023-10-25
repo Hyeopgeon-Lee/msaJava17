@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>공지 리스트</title>
+    <link rel="stylesheet" href="/css/table.css"/>
+    <script type="text/javascript" src="/js/common.js"></script>
+    <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+
+        // 상세보기
+        function doDetail(seq) {
+            location.href = "/notice/noticeInfo.html?nSeq=" + seq;
+        }
+
+        // HTML로딩이 완료되고, 실행됨
+        $(document).ready(function () {
+
+            $.ajax({ // Ajax 호출
+                url: "http://" + apiServer + "/notice/noticeList",
+                type: "post", // 전송방식은 Post
+                xhrFields: {
+                    withCredentials: true
+                },
+                dataType: "JSON", // 전송 결과는 JSON으로 받기
+                success: function (json) { // Ajax 요청이 성공했다면...
+                    for (let i = 0; i < json.length; i++) {
+                        $("#noticeList").append("<div class=\"divTableRow\">");
+
+                        if (json[i].noticeYn === "Y") { // 글번호 출력
+                            $("#noticeList").append("<div class=\"divTableCell\">공지사항</div>");
+
+                        } else {
+                            $("#noticeList").append("<div class=\"divTableCell\">" + json[i].noticeSeq + "</div>");
+
+                        }
+
+                        $("#noticeList").append(
+                            "<div class=\"divTableCell\" onclick='doDetail(" + json[i].noticeSeq + ")'>"
+                            + json[i].title + "</div>");
+                        $("#noticeList").append("<div class=\"divTableCell\">" + json[i].readCnt + "</div>");
+                        $("#noticeList").append("<div class=\"divTableCell\">" + json[i].userId + "</div>");
+                        $("#noticeList").append("<div class=\"divTableCell\">" + json[i].regDt + "</div>");
+                    }
+                },
+                // error: function (request, status, error) {
+                error: function () {
+                    alert("접근 권한이 없습니다.");
+                    location.href = loginPage;
+
+                }
+
+            })
+        })
+    </script>
+</head>
+<body>
+<h2>공지사항</h2>
+<hr/>
+<br/>
+<div class="divTable minimalistBlack">
+    <div class="divTableHeading">
+        <div class="divTableRow">
+            <div class="divTableHead">순번</div>
+            <div class="divTableHead">제목</div>
+            <div class="divTableHead">조회수</div>
+            <div class="divTableHead">등록자</div>
+            <div class="divTableHead">등록일</div>
+        </div>
+    </div>
+    <div class="divTableBody" id="noticeList">
+    </div>
+</div>
+<a href="/notice/noticeReg.html">글쓰기</a>
+</body>
+</html>

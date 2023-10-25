@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인 성공</title>
+    <link rel="stylesheet" href="/css/table.css"/>
+    <script type="text/javascript" src="/js/common.js"></script>
+    <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+
+        // HTML로딩이 완료되고, 실행됨
+        $(document).ready(function () {
+
+            // 회원정보
+            $("#btnUserInfo").on("click", function () { // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
+                location.href = "/user/userInfo.html";
+            })
+
+            // 공지사항
+            $("#btnNotice").on("click", function () { // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
+                location.href = "/notice/noticeList.html";
+            })
+
+            $.ajax({ // Ajax 호출
+                url: "http://" + apiServer + "/user/userInfo",
+                type: "post", // 전송방식은 Post
+                xhrFields: { // CORS 문제를 해결하기 위해 인증 Credentials 정보를 전달(서버쪽도 반드시 설정되어야 함)
+                    withCredentials: true
+                },
+                dataType: "JSON", // 전송 결과는 JSON으로 받기
+                success: function (json) { // Ajax 요청이 성공했다면...
+                    $("#loginUserId").append(json.userId + "님이 로그인하였습니다.");
+
+                },
+                // error: function (request, status, error) {
+                error: function () {
+                    alert("접근 권한이 없습니다.");
+                    location.href = loginPage;
+
+                }
+            })
+
+        })
+    </script>
+</head>
+<body>
+<div class="divTable minimalistBlack">
+    <div class="divTableBody">
+        <div class="divTableRow">
+            <div class="divTableCell">로그인된 사용자아이디</div>
+            <div class="divTableCell" id="loginUserId"></div>
+        </div>
+    </div>
+</div>
+<div></div>
+<br/><br/>
+<button id="btnUserInfo" type="button">회원정보</button>
+<button id="btnNotice" type="button">공지사항</button>
+</body>
+</html>
