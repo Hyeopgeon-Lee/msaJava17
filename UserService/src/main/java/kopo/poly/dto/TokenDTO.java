@@ -1,15 +1,13 @@
 package kopo.poly.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
 
-@Getter
-@Setter
+@Builder
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-public class TokenDTO {
+public record TokenDTO(String userId, // 회원아이디
+                       String role // 토큰에 저장되는 권한)
 
-    private String userId; // 회원아이디
-    private String role; // 토큰에 저장되는 권한
-
+) {
 }
+

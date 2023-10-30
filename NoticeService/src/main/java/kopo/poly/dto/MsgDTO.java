@@ -11,6 +11,5 @@ public class MsgDTO {
 
     private int result; // 성공 : 1 / 실패 : 그 외
     private String msg; // 메시지
-//    private UserInfoDTO userInfoDTO; // 회원 정보(로그인 처리 결과 전달할 때, 활용함)
 
 }

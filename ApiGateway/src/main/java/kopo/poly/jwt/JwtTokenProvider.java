@@ -7,12 +7,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -37,6 +39,8 @@ public class JwtTokenProvider {
 
     @Value("${jwt.token.refresh.name}")
     private String refreshTokenName;
+
+    public static final String HEADER_PREFIX = "Bearer "; // Bearer 토큰 사용을 위한 선언 값
 
     /**
      * JWT 토큰(Access Token)생성
@@ -161,8 +165,20 @@ public class JwtTokenProvider {
         HttpCookie cookie = request.getCookies().getFirst(tokenName);
 
         if (cookie != null) {
-
             token = CmmUtil.nvl(cookie.getValue());
+
+        }
+
+        // Cookies에 토큰이 존재하지 않으면, Baerer 토큰에 값이 있는지 확인함
+        if (token.length() == 0) {
+            String bearerToken = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+
+            log.info("bearerToken : " + bearerToken);
+            if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(HEADER_PREFIX)) {
+                token = bearerToken.substring(7);
+            }
+
+            log.info("bearerToken token : " + token);
 
         }
 

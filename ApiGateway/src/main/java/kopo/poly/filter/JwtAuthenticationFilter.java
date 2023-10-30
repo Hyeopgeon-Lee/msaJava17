@@ -26,6 +26,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter implements WebFilter {
 
+    public static final String HEADER_PREFIX = "Bearer ";
+
     @Value("${jwt.token.access.valid.time}")
     private long accessTokenValidTime;
 
@@ -93,6 +95,9 @@ public class JwtAuthenticationFilter implements WebFilter {
 
         log.info(this.getClass().getName() + ".filter Start!");
 
+        log.info("request :"+ request);
+        log.info("request :"+ request.getPath());
+
         // 쿠키에서 Access Token 가져오기
         String accessToken = CmmUtil.nvl(jwtTokenProvider.resolveToken(request, JwtTokenType.ACCESS_TOKEN));
 
@@ -109,6 +114,9 @@ public class JwtAuthenticationFilter implements WebFilter {
             // 토큰이 유효하면 토큰으로부터 유저 정보를 받아옵니다.
             // 받은 유저 정보 : hglee67 아이디의 권한을 SpringSecurity에 저장함
             Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
+
+            // Access JWT 토큰을 Bearer 토큰으로 인증헤더에 넣기
+//            exchange.getRequest().getHeaders().add(HttpHeaders.AUTHORIZATION, HEADER_PREFIX + accessToken);
 
             // SecurityContext 에 Authentication 객체를 저장합니다.
             return chain.filter(exchange)
@@ -148,6 +156,9 @@ public class JwtAuthenticationFilter implements WebFilter {
                 // 재발급된 Access Token을 쿠키에 저장함
                 response.addCookie(this.createTokenCookie(accessTokenName, accessTokenValidTime, reAccessToken));
 
+                // Access JWT 토큰을 Bearer 토큰으로 인증헤더에 넣기
+//                exchange.getRequest().getHeaders().add(HttpHeaders.AUTHORIZATION, HEADER_PREFIX + accessToken);
+                
                 // 토큰이 유효하면 토큰으로부터 유저 정보를 받아옵니다.
                 // 받은 유저 정보 : hglee67 아이디의 권한을 SpringSecurity에 저장함
                 Authentication authentication = jwtTokenProvider.getAuthentication(reAccessToken);
@@ -158,37 +169,10 @@ public class JwtAuthenticationFilter implements WebFilter {
             } else if (refreshTokenStatus == JwtStatus.EXPIRED) {
                 log.info("Refresh Token 만료 - 스프링 시큐리티가 로그인 페이지로 이동 시킴");
 
-//                createTokenCookie("test1234", 100000, "accessToken!@#$!@#$!@#$!@");
-
-
-//                response.addCookie(this.createTokenCookie("test1234", accessTokenValidTime, "accessToken!@#$!@#$!@#$!@"));
-
             } else {
                 log.info("Refresh Token 오류 - 스프링 시큐리티가 로그인 페이지로 이동 시킴");
 
             }
-
-//            ResponseCookie cookie = this.createTokenCookie("test1234", accessTokenValidTime, "accessToken!@#$!@#$!@#$!@!!!!!");
-
-//            CookieGenerator cookieGenerator = new CookieGenerator();
-//
-//            cookieGenerator.setCookieName("test1234");
-//            cookieGenerator.addCookie(response, "11341234123412");
-
-//            log.info("cookie : "+ cookie);
-
-//            response.addCookie(cookie);
-            //setHeader("Set-Cookie", cookie.toString());
-
-//            request.getCookies().set("test1234", this.createTokenCookie("test1234", accessTokenValidTime, "accessToken!@#$!@#$!@#$!@!!!!!1111"));
-//            response.set  addCookie(this.createTokenCookie("test1234", accessTokenValidTime, "accessToken!@#$!@#$!@#$!@!!!!!"));
-//            createTokenCookie("test1234", 1000000000, "accessToken!@#$!@#$!@#$!@");
-
-//            try {
-//                Thread.sleep(1000000000);
-//            } catch (InterruptedException e) {
-//                throw new RuntimeException(e);
-//            }
 
         }
 

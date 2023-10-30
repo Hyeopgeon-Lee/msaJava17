@@ -20,8 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Optional;
 
 
-@CrossOrigin(origins = {"http://localhost:13000", "http://localhost:14000"},
-        allowedHeaders = {"POST, GET"},
+@CrossOrigin(origins = {"http://localhost:12000",
+        "http://localhost:13000", "http://localhost:14000"},
+        allowedHeaders = {"POST, GET", "FEIGN"},
         allowCredentials = "true")
 @Tag(name = "로그인된 사용자들이 접근하는 서비스", description = "로그인된 사용자들이 접근하는 서비스 API")
 @Slf4j
@@ -39,18 +40,30 @@ public class UserInfoController {
     /**
      * JWT Access Token으로부터 user_id 가져오기
      */
-    private String getUserIdFromToken(HttpServletRequest request) {
+    @Operation(summary = "토큰에 저장된 회원정보 가져오기 API", description = "토큰에 저장된 회원정보 가져오기 API",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "404", description = "Page Not Found!"),
+            }
+    )
+    @PostMapping(value = "getTokenInfo")
+    private TokenDTO getTokenInfo(HttpServletRequest request) {
 
         // 로그 찍기(추후 찍은 로그를 통해 이 함수에 접근했는지 파악하기 용이하다.)
-        log.info(this.getClass().getName() + ".getUserIdFromToken Start!");
+        log.info(this.getClass().getName() + ".getTokenInfo Start!");
 
         //JWT Access 토큰 가져오기
         String jwtAccessToken = CmmUtil.nvl(jwtTokenProvider.resolveToken(request, JwtTokenType.ACCESS_TOKEN));
         log.info("jwtAccessToken : " + jwtAccessToken);
 
-        TokenDTO dto = Optional.ofNullable(jwtTokenProvider.getTokenInfo(jwtAccessToken)).orElseGet(TokenDTO::new);
+        TokenDTO dto = Optional.ofNullable(jwtTokenProvider.getTokenInfo(jwtAccessToken))
+                .orElseGet(() -> TokenDTO.builder().build());
 
-        return CmmUtil.nvl(dto.getUserId());
+        log.info("TokenDTO : " + dto);
+
+        log.info(this.getClass().getName() + ".getTokenInfo End!");
+
+        return dto;
 
     }
 
@@ -66,7 +79,7 @@ public class UserInfoController {
         log.info(this.getClass().getName() + ".userInfo Start!");
 
         // Access Token에 저장된 회원아이디 가져오기
-        String userId = this.getUserIdFromToken(request);
+        String userId = CmmUtil.nvl(this.getTokenInfo(request).userId());
 
         UserInfoDTO pDTO = new UserInfoDTO();
         pDTO.setUserId(userId);
