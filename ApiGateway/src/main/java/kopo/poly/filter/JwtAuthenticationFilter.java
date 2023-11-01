@@ -95,8 +95,8 @@ public class JwtAuthenticationFilter implements WebFilter {
 
         log.info(this.getClass().getName() + ".filter Start!");
 
-        log.info("request :"+ request);
-        log.info("request :"+ request.getPath());
+        log.info("request :" + request);
+        log.info("request :" + request.getPath());
 
         // 쿠키에서 Access Token 가져오기
         String accessToken = CmmUtil.nvl(jwtTokenProvider.resolveToken(request, JwtTokenType.ACCESS_TOKEN));
@@ -114,9 +114,6 @@ public class JwtAuthenticationFilter implements WebFilter {
             // 토큰이 유효하면 토큰으로부터 유저 정보를 받아옵니다.
             // 받은 유저 정보 : hglee67 아이디의 권한을 SpringSecurity에 저장함
             Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
-
-            // Access JWT 토큰을 Bearer 토큰으로 인증헤더에 넣기
-//            exchange.getRequest().getHeaders().add(HttpHeaders.AUTHORIZATION, HEADER_PREFIX + accessToken);
 
             // SecurityContext 에 Authentication 객체를 저장합니다.
             return chain.filter(exchange)
@@ -139,10 +136,10 @@ public class JwtAuthenticationFilter implements WebFilter {
 
                 // Refresh Token에 저장된 정보 가져오기
                 TokenDTO rDTO = Optional.ofNullable(jwtTokenProvider.getTokenInfo(refreshToken))
-                        .orElseGet(TokenDTO::new);
+                        .orElseGet(() -> TokenDTO.builder().build());
 
-                String userId = CmmUtil.nvl(rDTO.getUserId()); // 회원 아이디
-                String userRoles = CmmUtil.nvl(rDTO.getRole()); // 회원 권한
+                String userId = CmmUtil.nvl(rDTO.userId()); // 회원 아이디
+                String userRoles = CmmUtil.nvl(rDTO.role()); // 회원 권한
 
                 log.info("refreshToken userId : " + userId);
                 log.info("refreshToken userRoles : " + userRoles);
@@ -156,9 +153,6 @@ public class JwtAuthenticationFilter implements WebFilter {
                 // 재발급된 Access Token을 쿠키에 저장함
                 response.addCookie(this.createTokenCookie(accessTokenName, accessTokenValidTime, reAccessToken));
 
-                // Access JWT 토큰을 Bearer 토큰으로 인증헤더에 넣기
-//                exchange.getRequest().getHeaders().add(HttpHeaders.AUTHORIZATION, HEADER_PREFIX + accessToken);
-                
                 // 토큰이 유효하면 토큰으로부터 유저 정보를 받아옵니다.
                 // 받은 유저 정보 : hglee67 아이디의 권한을 SpringSecurity에 저장함
                 Authentication authentication = jwtTokenProvider.getAuthentication(reAccessToken);

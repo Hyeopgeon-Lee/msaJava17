@@ -55,8 +55,7 @@ public class NoticeController {
 
     @Operation(summary = "공지사항 상세보기 결과제공 API", description = "공지사항 상세보기 결과 및 조회수 증가 API", parameters = {@Parameter(name = "nSeq", description = "공지사항 글번호"), @Parameter(name = "readCntYn", description = "조회수 증가여부")}, responses = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "Page Not Found!"),})
     @PostMapping(value = "noticeInfo")
-    public NoticeDTO noticeInfo(HttpServletRequest request,
-                                @CookieValue(value = "${jwt.token.access.name}") String accessToken) throws Exception {
+    public NoticeDTO noticeInfo(HttpServletRequest request) throws Exception {
 
         log.info(this.getClass().getName() + ".noticeInfo Start!");
 
@@ -64,7 +63,7 @@ public class NoticeController {
         String readCntYn = CmmUtil.nvl(request.getParameter("readCntYn")); // 조회수 증가여부
 
         boolean readCnt = readCntYn.equals("Y"); // 공지사항 증가여부를 boolean 값으로 변경
-        String bearer = "Bearer " + accessToken;
+
         /*
          * ####################################################################################
          * 반드시, 값을 받았으면, 꼭 로그를 찍어서 값이 제대로 들어오는지 파악해야함 반드시 작성할 것
@@ -73,22 +72,20 @@ public class NoticeController {
         log.info("nSeq : " + nSeq);
         log.info("readCntYn : " + readCntYn);
         log.info("readCnt : " + readCnt);
-        log.info("accessToken : " + accessToken);
-        log.info("bearer : " + bearer);
 
         /*
          * 값 전달은 반드시 DTO 객체를 이용해서 처리함 전달 받은 값을 DTO 객체에 넣는다.
          */
-        NoticeDTO pDTO = new NoticeDTO();
-        pDTO.setNoticeSeq(Long.parseLong(nSeq));
+        NoticeDTO pDTO = NoticeDTO.builder().noticeSeq(Long.parseLong(nSeq)).build();
 
         // Java 8부터 제공되는 Optional 활용하여 NPE(Null Pointer Exception) 처리
-        NoticeDTO rDTO = Optional.ofNullable(noticeService.getNoticeInfo(pDTO, readCnt)).orElseGet(NoticeDTO::new);
+        NoticeDTO rDTO = Optional.ofNullable(noticeService.getNoticeInfo(pDTO, readCnt))
+                .orElseGet(() -> NoticeDTO.builder().build());
 
-        TokenDTO tDTO = tokenAPIService.getTokenInfo(bearer); // UserService로부터 Token 값 받아오기
-        log.info("TokenDTO : " + tDTO); // Token 값 출력하기
-
-        rDTO.setLoginId(CmmUtil.nvl(tDTO.userId())); // 토큰 값에서 받아온 로그인 아이디 추가
+//        TokenDTO tDTO = tokenAPIService.getTokenInfo(bearer); // UserService로부터 Token 값 받아오기
+//        log.info("TokenDTO : " + tDTO); // Token 값 출력하기
+//
+//        rDTO.setLoginId(CmmUtil.nvl(tDTO.userId())); // 토큰 값에서 받아온 로그인 아이디 추가
 
         log.info(this.getClass().getName() + ".noticeInfo End!");
 
@@ -127,11 +124,8 @@ public class NoticeController {
             log.info("contents : " + contents);
 
             // 데이터 저장하기 위해 DTO에 저장하기
-            NoticeDTO pDTO = new NoticeDTO();
-            pDTO.setUserId(userId);
-            pDTO.setTitle(title);
-            pDTO.setNoticeYn(noticeYn);
-            pDTO.setContents(contents);
+            NoticeDTO pDTO = NoticeDTO.builder().userId(userId).title(title)
+                    .noticeYn(noticeYn).contents(contents).build();
 
             /*
              * 게시글 등록하기위한 비즈니스 로직을 호출
@@ -193,12 +187,8 @@ public class NoticeController {
             /*
              * 값 전달은 반드시 DTO 객체를 이용해서 처리함 전달 받은 값을 DTO 객체에 넣는다.
              */
-            NoticeDTO pDTO = new NoticeDTO();
-            pDTO.setUserId(userId);
-            pDTO.setNoticeSeq(Long.parseLong(nSeq));
-            pDTO.setTitle(title);
-            pDTO.setNoticeYn(noticeYn);
-            pDTO.setContents(contents);
+            NoticeDTO pDTO = NoticeDTO.builder().userId(userId).noticeSeq(Long.parseLong(nSeq))
+                    .title(title).noticeYn(noticeYn).contents(contents).build();
 
             // 게시글 수정하기 DB
             noticeService.updateNoticeInfo(pDTO);
@@ -245,8 +235,7 @@ public class NoticeController {
             /*
              * 값 전달은 반드시 DTO 객체를 이용해서 처리함 전달 받은 값을 DTO 객체에 넣는다.
              */
-            NoticeDTO pDTO = new NoticeDTO();
-            pDTO.setNoticeSeq(Long.parseLong(nSeq));
+            NoticeDTO pDTO = NoticeDTO.builder().noticeSeq(Long.parseLong(nSeq)).build();
 
             // 게시글 삭제하기 DB
             noticeService.deleteNoticeInfo(pDTO);

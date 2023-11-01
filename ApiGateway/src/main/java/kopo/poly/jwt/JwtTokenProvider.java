@@ -92,10 +92,7 @@ public class JwtTokenProvider {
         log.info("userId : " + userId);
         log.info("role : " + role);
 
-        TokenDTO pDTO = new TokenDTO();
-
-        pDTO.setUserId(userId);
-        pDTO.setRole(role);
+        TokenDTO pDTO = TokenDTO.builder().userId(userId).role(role).build();
 
         log.info(this.getClass().getName() + ".getTokenInfo End!");
 
@@ -117,10 +114,10 @@ public class JwtTokenProvider {
         TokenDTO rDTO = getTokenInfo(token); // 토큰에 저장된 정보 가져오기
 
         // JWT 토큰에 저장된 사용자 아이디 : hglee67
-        String userId = CmmUtil.nvl(rDTO.getUserId());
+        String userId = CmmUtil.nvl(rDTO.userId());
 
         // JWT 토큰에 저장된 사용자 아이디 : ROLE_USER
-        String roles = CmmUtil.nvl(rDTO.getRole());
+        String roles = CmmUtil.nvl(rDTO.role());
 
         log.info("user_id : " + userId);
         log.info("roles : " + roles);

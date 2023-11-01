@@ -51,14 +51,14 @@ public class NoticeService implements INoticeService {
 
         if (type) {
             // 조회수 증가하기
-            int res = noticeRepository.updateReadCnt(pDTO.getNoticeSeq());
+            int res = noticeRepository.updateReadCnt(pDTO.noticeSeq());
 
             // 조회수 증가 성공여부 체크
             log.info("res : " + res);
         }
 
         // 공지사항 상세내역 가져오기
-        NoticeEntity rEntity = noticeRepository.findByNoticeSeq(pDTO.getNoticeSeq());
+        NoticeEntity rEntity = noticeRepository.findByNoticeSeq(pDTO.noticeSeq());
 
         // 엔티티의 값들을 DTO에 맞게 넣어주기
         NoticeDTO rDTO = new ObjectMapper().convertValue(rEntity, NoticeDTO.class);
@@ -74,12 +74,12 @@ public class NoticeService implements INoticeService {
 
         log.info(this.getClass().getName() + ".updateNoticeInfo Start!");
 
-        Long noticeSeq = pDTO.getNoticeSeq();
+        Long noticeSeq = pDTO.noticeSeq();
 
-        String title = CmmUtil.nvl(pDTO.getTitle());
-        String noticeYn = CmmUtil.nvl(pDTO.getNoticeYn());
-        String contents = CmmUtil.nvl(pDTO.getContents());
-        String userId = CmmUtil.nvl(pDTO.getUserId());
+        String title = CmmUtil.nvl(pDTO.title());
+        String noticeYn = CmmUtil.nvl(pDTO.noticeYn());
+        String contents = CmmUtil.nvl(pDTO.contents());
+        String userId = CmmUtil.nvl(pDTO.userId());
 
         log.info("noticeSeq : " + noticeSeq);
         log.info("title : " + title);
@@ -108,7 +108,7 @@ public class NoticeService implements INoticeService {
 
         log.info(this.getClass().getName() + ".deleteNoticeInfo Start!");
 
-        Long noticeSeq = pDTO.getNoticeSeq();
+        Long noticeSeq = pDTO.noticeSeq();
 
         log.info("noticeSeq : " + noticeSeq);
 
@@ -124,10 +124,10 @@ public class NoticeService implements INoticeService {
 
         log.info(this.getClass().getName() + ".insertNoticeInfo Start!");
 
-        String title = CmmUtil.nvl(pDTO.getTitle());
-        String noticeYn = CmmUtil.nvl(pDTO.getNoticeYn());
-        String contents = CmmUtil.nvl(pDTO.getContents());
-        String userId = CmmUtil.nvl(pDTO.getUserId());
+        String title = CmmUtil.nvl(pDTO.title());
+        String noticeYn = CmmUtil.nvl(pDTO.noticeYn());
+        String contents = CmmUtil.nvl(pDTO.contents());
+        String userId = CmmUtil.nvl(pDTO.userId());
 
         log.info("title : " + title);
         log.info("noticeYn : " + noticeYn);
