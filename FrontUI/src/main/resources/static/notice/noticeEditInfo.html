@@ -8,6 +8,9 @@
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
     <script type="text/javascript">
 
+        let param = new URLSearchParams(window.location.search);
+        const nSeq = param.get("nSeq"); // night; // 현재 글번호
+
         // HTML로딩이 완료되고, 실행됨
         $(document).ready(function () {
 
@@ -21,23 +24,25 @@
 
         // 공지사항 내용 수정을 편하게하기 위해 상세 내역 조회하기
         function getNoticeInfo() {
-            $.ajax({ // Ajax 호출
+
+            $.ajax({
                 url: "http://" + apiServer + "/notice/noticeInfo",
                 type: "post", // 전송방식은 Post
                 data: {"nSeq": nSeq, "readCntYn": "N"}, // 글번호, 조회수 증가여부를 파라미터로 전달
                 dataType: "JSON", // 전송 결과는 JSON으로 받기
                 xhrFields: {
                     withCredentials: true
-                },
-                success: function (json) { // Ajax 요청이 성공했다면...
-                    $("#title").val(json.title);
-                    $("#regDt").val(json.regDt);
-                    $("#readCnt").val(json.readCnt);
-                    $("#contents").val(json.contents);
-
-                    $(":radio[name='noticeYn'][value='" + json.noticeYn + "']").attr('checked', true);
                 }
-            })
+            }).then(function (json) {
+                $("#title").val(json.title);
+                $("#regDt").val(json.regDt);
+                $("#readCnt").val(json.readCnt);
+                $("#contents").val(json.contents);
+
+                $(":radio[name='noticeYn'][value='" + json.noticeYn + "']").attr('checked', true);
+
+            });
+
         }
 
         //글자 길이 바이트 단위로 체크하기(바이트값 전달)
