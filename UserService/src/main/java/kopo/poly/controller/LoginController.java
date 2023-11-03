@@ -26,7 +26,7 @@ import java.util.Optional;
 @CrossOrigin(origins = {"http://localhost:13000", "http://localhost:14000"},
         allowedHeaders = {"POST, GET"},
         allowCredentials = "true")
-@Tag(name = "로그인 안된 요청들이 접근하는 서비스", description = "로그인 성공, 실패 API")
+@Tag(name = "로그인 관련 API", description = "로그인 관련 API 설명입니다.")
 @Slf4j
 @RequestMapping(value = "/login")
 @RequiredArgsConstructor
@@ -60,11 +60,11 @@ public class LoginController {
         log.info(this.getClass().getName() + ".loginSuccess Start!");
 
         // Spring Security에 저장된 정보 가져오기
-        UserInfoDTO rDTO = Optional.ofNullable(authInfo.getUserInfoDTO()).orElseGet(UserInfoDTO::new);
+        UserInfoDTO rDTO = Optional.ofNullable(authInfo.userInfoDTO()).orElseGet(() -> UserInfoDTO.builder().build());
 
-        String userId = CmmUtil.nvl(rDTO.getUserId());
-        String userName = CmmUtil.nvl(rDTO.getUserName());
-        String userRoles = CmmUtil.nvl(rDTO.getRoles());
+        String userId = CmmUtil.nvl(rDTO.userId());
+        String userName = CmmUtil.nvl(rDTO.userName());
+        String userRoles = CmmUtil.nvl(rDTO.roles());
 
         log.info("userId : " + userId);
         log.info("userName : " + userName);
@@ -111,9 +111,7 @@ public class LoginController {
         response.addHeader("Set-Cookie", cookie.toString());
 
         // 결과 메시지 전달하기
-        MsgDTO dto = new MsgDTO();
-        dto.setResult(1);
-        dto.setMsg(userName + "님 로그인이 성공하였습니다.");
+        MsgDTO dto = MsgDTO.builder().result(1).msg(userName + "님 로그인이 성공하였습니다.").build();
 
         log.info(this.getClass().getName() + ".loginSuccess End!");
 
@@ -133,9 +131,7 @@ public class LoginController {
         log.info(this.getClass().getName() + ".loginFail Start!");
 
         // 결과 메시지 전달하기
-        MsgDTO dto = new MsgDTO();
-        dto.setResult(0);
-        dto.setMsg("로그인이 실패하였습니다.");
+        MsgDTO dto = MsgDTO.builder().result(1).msg("로그인이 실패하였습니다.").build();
 
         log.info(this.getClass().getName() + ".loginFail End!");
 

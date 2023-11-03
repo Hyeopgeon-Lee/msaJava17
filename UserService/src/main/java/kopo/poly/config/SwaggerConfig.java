@@ -13,8 +13,8 @@ public class SwaggerConfig {
 
     private Info apiInfo() {
         return new Info()
-                .title("NoticeService")
-                .description("Notice Service Description!!")
+                .title("UserService")
+                .description("User Service Description!!")
                 .contact(new Contact().name("Prof. Hyeopgeon Lee")
                         .email("hglee67@kopo.ac.kr")
                         .url("https://www.kopo.ac.kr/kangseo/content.do?menu=1547"))

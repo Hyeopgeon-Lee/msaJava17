@@ -24,7 +24,7 @@ import java.util.Optional;
         "http://localhost:13000", "http://localhost:14000"},
         allowedHeaders = {"POST, GET", "FEIGN"},
         allowCredentials = "true")
-@Tag(name = "로그인된 사용자들이 접근하는 서비스", description = "로그인된 사용자들이 접근하는 서비스 API")
+@Tag(name = "로그인된 사용자들이 접근하는 API", description = "로그인된 사용자들이 접근하는 API 설명입니다.")
 @Slf4j
 @RequestMapping(value = "/user")
 @RequiredArgsConstructor
@@ -81,11 +81,11 @@ public class UserInfoController {
         // Access Token에 저장된 회원아이디 가져오기
         String userId = CmmUtil.nvl(this.getTokenInfo(request).userId());
 
-        UserInfoDTO pDTO = new UserInfoDTO();
-        pDTO.setUserId(userId);
+        UserInfoDTO pDTO = UserInfoDTO.builder().userId(userId).build();
 
         // 회원정보 조회하기
-        UserInfoDTO rDTO = Optional.ofNullable(userInfoService.getUserInfo(pDTO)).orElseGet(UserInfoDTO::new);
+        UserInfoDTO rDTO = Optional.ofNullable(userInfoService.getUserInfo(pDTO))
+                .orElseGet(() -> UserInfoDTO.builder().build());
 
         log.info(this.getClass().getName() + ".userInfo End!");
 

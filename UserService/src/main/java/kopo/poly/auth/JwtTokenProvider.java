@@ -124,7 +124,7 @@ public class JwtTokenProvider {
     }
 
     /**
-     * 쿠기에 저장된 JWT 토큰(Access Token, Refresh Token) 가져오기
+     * 쿠기 및 인증해더(Bearer) 저장된 JWT 토큰(Access Token, Refresh Token) 가져오기
      *
      * @param request   request 정보
      * @param tokenType token 유형
@@ -160,7 +160,7 @@ public class JwtTokenProvider {
             }
         }
 
-        // Cookies에 토큰이 존재하지 않으면, Baerer 토큰에 값이 있는지 확인함
+        // Cookies에 토큰이 존재하지 않으면, Beaerer 토큰에 값이 있는지 확인함
         if (token.length() == 0) {
             String bearerToken = request.getHeader(HttpHeaders.AUTHORIZATION);
 

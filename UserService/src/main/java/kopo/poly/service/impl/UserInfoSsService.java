@@ -62,13 +62,13 @@ public class UserInfoSsService implements IUserInfoSsService {
 
         int res = 0; // 회원가입 성공 : 1, 아이디 중복으로인한 가입 취소 : 2, 기타 에러 발생 : 0
 
-        String userId = CmmUtil.nvl(pDTO.getUserId()); // 아이디
-        String userName = CmmUtil.nvl(pDTO.getUserName()); // 이름
-        String password = CmmUtil.nvl(pDTO.getPassword()); // 비밀번호
-        String email = CmmUtil.nvl(pDTO.getEmail()); // 이메일
-        String addr1 = CmmUtil.nvl(pDTO.getAddr1()); // 주소
-        String addr2 = CmmUtil.nvl(pDTO.getAddr2()); // 상세주소
-        String roles = CmmUtil.nvl(pDTO.getRoles()); // 권한
+        String userId = CmmUtil.nvl(pDTO.userId()); // 아이디
+        String userName = CmmUtil.nvl(pDTO.userName()); // 이름
+        String password = CmmUtil.nvl(pDTO.password()); // 비밀번호
+        String email = CmmUtil.nvl(pDTO.email()); // 이메일
+        String addr1 = CmmUtil.nvl(pDTO.addr1()); // 주소
+        String addr2 = CmmUtil.nvl(pDTO.addr2()); // 상세주소
+        String roles = CmmUtil.nvl(pDTO.roles()); // 권한
 
         log.info("userId : " + userId);
         log.info("userName : " + userName);
@@ -126,7 +126,7 @@ public class UserInfoSsService implements IUserInfoSsService {
         log.info(this.getClass().getName() + ".getUserInfo Start!");
 
         // 회원아이디
-        String user_id = CmmUtil.nvl(pDTO.getUserId());
+        String user_id = CmmUtil.nvl(pDTO.userId());
 
         log.info("user_id : " + user_id);
 
@@ -136,15 +136,20 @@ public class UserInfoSsService implements IUserInfoSsService {
 
         // 값이 존재한다면..
         if (rEntity.isPresent()) {
-            // rEntity를 rDTO 형태로 변경하기
-            rDTO = new ObjectMapper().convertValue(rEntity.get(), UserInfoDTO.class);
 
-            // 암호화되어 있는 이메일 주소를 복호화하기
-            String email = EncryptUtil.decAES128CBC(CmmUtil.nvl(rDTO.getEmail()));
+            // Entity -> DTO로 변경
+            // DB 저장된 암호화된 Email 값을 복호화해서 DTO에 저장하기 위해 ObjectMapper 사용 안함
+            rDTO = UserInfoDTO.builder()
+                    .userId(CmmUtil.nvl(rEntity.get().getUserId()))
+                    .userName(CmmUtil.nvl(rEntity.get().getUserName()))
 
-            rDTO.setEmail(email); // 복호화된 이메일 주소를 암호화된 이메일 주소 값에 덮어쓰기
+                    // 이메일 주소를 복호화해서 Record 저장하기
+                    .email(EncryptUtil.decAES128CBC(CmmUtil.nvl(rEntity.get().getEmail())))
+                    .addr1(CmmUtil.nvl(rEntity.get().getAddr1()))
+                    .addr2(CmmUtil.nvl(rEntity.get().getAddr2()))
+                    .build();
+
         }
-
 
         log.info(this.getClass().getName() + ".getUserInfo End!");
 

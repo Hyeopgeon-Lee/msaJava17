@@ -19,11 +19,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
-
 @CrossOrigin(origins = {"http://localhost:13000", "http://localhost:14000"},
         allowedHeaders = {"POST, GET"},
         allowCredentials = "true")
-@Tag(name = "로그인 안된 요청들이 접근하는 서비스", description = "회원가입 API")
+@Tag(name = "회원가입을 위한 API", description = "회원가입을 위한 API 설명입니다.")
 @Slf4j
 @RequestMapping(value = "/reg")
 @RequiredArgsConstructor
@@ -48,10 +47,10 @@ public class UserRegController {
 
         int res = 0; // 회원가입 결과
         String msg = ""; //회원가입 결과에 대한 메시지를 전달할 변수
-        MsgDTO dto = null; // 결과 메시지 구조
+        MsgDTO dto; // 결과 메시지 구조
 
         //웹(회원정보 입력화면)에서 받는 정보를 저장할 변수
-        UserInfoDTO pDTO = null;
+        UserInfoDTO pDTO;
 
         try {
 
@@ -62,8 +61,8 @@ public class UserRegController {
              *    무조건 웹으로 받은 정보는 DTO에 저장하기 위해 임시로 String 변수에 저장함
              * ##############################################################################
              */
-            String user_id = CmmUtil.nvl(request.getParameter("user_id")); //아이디
-            String user_name = CmmUtil.nvl(request.getParameter("user_name")); //이름
+            String userId = CmmUtil.nvl(request.getParameter("user_id")); //아이디
+            String userName = CmmUtil.nvl(request.getParameter("user_name")); //이름
             String password = CmmUtil.nvl(request.getParameter("password")); //비밀번호
             String email = CmmUtil.nvl(request.getParameter("email")); //이메일
             String addr1 = CmmUtil.nvl(request.getParameter("addr1")); //주소
@@ -82,8 +81,8 @@ public class UserRegController {
              * 						반드시 작성할 것
              * ##############################################################################
              * */
-            log.info("user_id : " + user_id);
-            log.info("user_name : " + user_name);
+            log.info("userId : " + userId);
+            log.info("userName : " + userName);
             log.info("password : " + password);
             log.info("email : " + email);
             log.info("addr1 : " + addr1);
@@ -98,19 +97,11 @@ public class UserRegController {
              */
 
             //웹(회원정보 입력화면)에서 받는 정보를 저장할 변수를 메모리에 올리기
-            pDTO = new UserInfoDTO();
-
-            pDTO.setUserId(user_id);
-            pDTO.setUserName(user_name);
-
-            //비밀번호는 Spring Security에서 제공하는 해시 암호화 수행
-            pDTO.setPassword(bCryptPasswordEncoder.encode(password));
-
-            //민감 정보인 이메일은 AES128-CBC로 암호화함
-            pDTO.setEmail(EncryptUtil.encAES128CBC(email));
-            pDTO.setAddr1(addr1);
-            pDTO.setAddr2(addr2);
-            pDTO.setRoles(UserRole.USER.getValue());
+            pDTO = UserInfoDTO.builder().userId(userId)
+                    .userName(userName)
+                    .password(bCryptPasswordEncoder.encode(password))
+                    .email(EncryptUtil.encAES128CBC(email))
+                    .addr1(addr1).addr2(addr2).roles(UserRole.USER.getValue()).build();
 
             /*
              * #######################################################
@@ -142,14 +133,12 @@ public class UserRegController {
         } catch (Exception e) {
             //저장이 실패되면 사용자에게 보여줄 메시지
             msg = "실패하였습니다. : " + e;
+            res = 2;
             log.info(e.toString());
             e.printStackTrace();
 
         } finally {
-            // 결과 메시지 전달하기
-            dto = new MsgDTO();
-            dto.setResult(res);
-            dto.setMsg(msg);
+            dto = MsgDTO.builder().result(res).msg(msg).build();
 
             log.info(this.getClass().getName() + ".insertUserInfo End!");
 
