@@ -82,11 +82,6 @@ public class NoticeController {
         NoticeDTO rDTO = Optional.ofNullable(noticeService.getNoticeInfo(pDTO, readCnt))
                 .orElseGet(() -> NoticeDTO.builder().build());
 
-//        TokenDTO tDTO = tokenAPIService.getTokenInfo(bearer); // UserService로부터 Token 값 받아오기
-//        log.info("TokenDTO : " + tDTO); // Token 값 출력하기
-//
-//        rDTO.setLoginId(CmmUtil.nvl(tDTO.userId())); // 토큰 값에서 받아온 로그인 아이디 추가
-
         log.info(this.getClass().getName() + ".noticeInfo End!");
 
         return rDTO;

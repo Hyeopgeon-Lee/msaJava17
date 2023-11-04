@@ -13,9 +13,9 @@ public class SwaggerConfig {
 
     private Info apiInfo() {
         return new Info()
-                .title("UserService")
-                .description("User Service Description!!")
-                .contact(new Contact().name("Prof. Hyeopgeon Lee")
+                .title("UserService") // 문서 제목
+                .description("User Service Description!!") // 문서 설명
+                .contact(new Contact().name("Prof. Hyeopgeon Lee") // 명세서 작성자 정보
                         .email("hglee67@kopo.ac.kr")
                         .url("https://www.kopo.ac.kr/kangseo/content.do?menu=1547"))
                 .license(new License()

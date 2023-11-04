@@ -132,6 +132,7 @@ public class UserInfoSsService implements IUserInfoSsService {
 
         UserInfoDTO rDTO = null;
 
+        // SELECT * FROM USER_INFO WHERE USER_ID = 'hglee67' 쿼리 실행과 동일
         Optional<UserInfoEntity> rEntity = userInfoRepository.findByUserId(user_id);
 
         // 값이 존재한다면..
@@ -147,6 +148,7 @@ public class UserInfoSsService implements IUserInfoSsService {
                     .email(EncryptUtil.decAES128CBC(CmmUtil.nvl(rEntity.get().getEmail())))
                     .addr1(CmmUtil.nvl(rEntity.get().getAddr1()))
                     .addr2(CmmUtil.nvl(rEntity.get().getAddr2()))
+                    .roles(rEntity.get().getRoles())
                     .build();
 
         }

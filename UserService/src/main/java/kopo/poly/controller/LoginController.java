@@ -60,7 +60,8 @@ public class LoginController {
         log.info(this.getClass().getName() + ".loginSuccess Start!");
 
         // Spring Security에 저장된 정보 가져오기
-        UserInfoDTO rDTO = Optional.ofNullable(authInfo.userInfoDTO()).orElseGet(() -> UserInfoDTO.builder().build());
+        UserInfoDTO rDTO = Optional.ofNullable(authInfo.userInfoDTO())
+                .orElseGet(() -> UserInfoDTO.builder().build());
 
         String userId = CmmUtil.nvl(rDTO.userId());
         String userName = CmmUtil.nvl(rDTO.userName());
