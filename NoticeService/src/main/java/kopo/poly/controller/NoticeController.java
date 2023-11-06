@@ -95,7 +95,7 @@ public class NoticeController {
         log.info(this.getClass().getName() + ".noticeInsert Start!");
 
         String msg = ""; // 메시지 내용
-
+        int res = 0; // 성공 여부
         MsgDTO dto = null; // 결과 메시지 구조
 
         try {
@@ -129,6 +129,7 @@ public class NoticeController {
 
             // 저장이 완료되면 사용자에게 보여줄 메시지
             msg = "등록되었습니다.";
+            res = 1;
 
         } catch (Exception e) {
 
@@ -139,8 +140,7 @@ public class NoticeController {
 
         } finally {
             // 결과 메시지 전달하기
-            dto = new MsgDTO();
-            dto.setMsg(msg);
+            dto = MsgDTO.builder().result(res).msg(msg).build();
 
             log.info(this.getClass().getName() + ".noticeInsert End!");
         }
@@ -156,6 +156,7 @@ public class NoticeController {
         log.info(this.getClass().getName() + ".noticeUpdate Start!");
 
         String msg = ""; // 메시지 내용
+        int res = 0; // 성공 여부
         MsgDTO dto = null; // 결과 메시지 구조
 
         try {
@@ -189,7 +190,7 @@ public class NoticeController {
             noticeService.updateNoticeInfo(pDTO);
 
             msg = "수정되었습니다.";
-
+            res = 0;
         } catch (Exception e) {
             msg = "실패하였습니다. : " + e.getMessage();
             log.info(e.toString());
@@ -198,8 +199,7 @@ public class NoticeController {
         } finally {
 
             // 결과 메시지 전달하기
-            dto = new MsgDTO();
-            dto.setMsg(msg);
+            dto = MsgDTO.builder().result(res).msg(msg).build();
 
             log.info(this.getClass().getName() + ".noticeUpdate End!");
 
@@ -215,6 +215,7 @@ public class NoticeController {
         log.info(this.getClass().getName() + ".noticeDelete Start!");
 
         String msg = ""; // 메시지 내용
+        int res = 0; // 성공 여부
         MsgDTO dto = null; // 결과 메시지 구조
 
         try {
@@ -236,6 +237,7 @@ public class NoticeController {
             noticeService.deleteNoticeInfo(pDTO);
 
             msg = "삭제되었습니다.";
+            res = 1;
 
         } catch (Exception e) {
             msg = "실패하였습니다. : " + e.getMessage();
@@ -244,8 +246,7 @@ public class NoticeController {
 
         } finally {
             // 결과 메시지 전달하기
-            dto = new MsgDTO();
-            dto.setMsg(msg);
+            dto = MsgDTO.builder().result(res).msg(msg).build();
 
             log.info(this.getClass().getName() + ".noticeDelete End!");
 
