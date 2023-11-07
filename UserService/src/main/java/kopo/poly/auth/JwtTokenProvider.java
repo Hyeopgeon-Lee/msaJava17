@@ -30,7 +30,7 @@ public class JwtTokenProvider {
     @Value("${jwt.secret.key}")
     private String secretKey;
 
-    @Value("${jwtw.token.creator}")
+    @Value("${jwt.token.creator}")
     private String creator;
 
     @Value("${jwt.token.access.valid.time}")
