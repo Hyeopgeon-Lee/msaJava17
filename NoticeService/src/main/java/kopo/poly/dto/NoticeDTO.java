@@ -1,8 +1,10 @@
 package kopo.poly.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 
 @Builder
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public record NoticeDTO(
 
         Long noticeSeq, // 기본키, 순번

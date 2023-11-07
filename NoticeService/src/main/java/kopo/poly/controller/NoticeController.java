@@ -32,6 +32,7 @@ public class NoticeController {
 
     private final ITokenAPIService tokenAPIService;
 
+    public static final String HEADER_PREFIX = "Bearer "; // Bearer 토큰 사용을 위한 선언 값
 
     @Operation(summary = "공지사항 리스트 API", description = "공지사항 리스트 정보 제공하는 API", responses = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "Page Not Found!"),})
     @PostMapping(value = "noticeList")
@@ -47,13 +48,14 @@ public class NoticeController {
         // 로그 찍기(추후 찍은 로그를 통해 이 함수 호출이 끝났는지 파악하기 용이하다.)
         log.info(this.getClass().getName() + ".noticeList End!");
 
-        // 함수 처리가 끝나고 보여줄 HTML (Thymeleaf) 파일명
-        // templates/notice/noticeList.html
         return rList;
-
     }
 
-    @Operation(summary = "공지사항 상세보기 결과제공 API", description = "공지사항 상세보기 결과 및 조회수 증가 API", parameters = {@Parameter(name = "nSeq", description = "공지사항 글번호"), @Parameter(name = "readCntYn", description = "조회수 증가여부")}, responses = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "Page Not Found!"),})
+    @Operation(summary = "공지사항 상세보기 결과제공 API", description = "공지사항 상세보기 결과 및 조회수 증가 API",
+            parameters = {@Parameter(name = "nSeq", description = "공지사항 글번호"),
+                    @Parameter(name = "readCntYn", description = "조회수 증가여부")},
+            responses = {@ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "404", description = "Page Not Found!"),})
     @PostMapping(value = "noticeInfo")
     public NoticeDTO noticeInfo(HttpServletRequest request) throws Exception {
 
@@ -87,7 +89,9 @@ public class NoticeController {
         return rDTO;
     }
 
-    @Operation(summary = "공지사항 등록 API", description = "공지사항 등록 및 등록결과를 제공하는 API", responses = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "Page Not Found!"),})
+    @Operation(summary = "공지사항 등록 API", description = "공지사항 등록 및 등록결과를 제공하는 API",
+            responses = {@ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "404", description = "Page Not Found!"),})
     @PostMapping(value = "noticeInsert")
     public MsgDTO noticeInsert(HttpServletRequest request,
                                @CookieValue(value = "${jwt.token.access.name}") String token) {
@@ -99,7 +103,7 @@ public class NoticeController {
         MsgDTO dto = null; // 결과 메시지 구조
 
         try {
-            TokenDTO tDTO = tokenAPIService.getTokenInfo(token); // UserService로부터 Token 값 받아오기
+            TokenDTO tDTO = tokenAPIService.getTokenInfo(HEADER_PREFIX + token); // UserService로부터 Token 값 받아오기
             log.info("TokenDTO : " + tDTO); // Token 값 출력하기
 
             //JWT Access 토큰으로부터 회원아이디 가져오기
@@ -148,7 +152,9 @@ public class NoticeController {
         return dto;
     }
 
-    @Operation(summary = "공지사항 수정 API", description = "공지사항 수정 및 수정결과를 제공하는 API", responses = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "Page Not Found!"),})
+    @Operation(summary = "공지사항 수정 API", description = "공지사항 수정 및 수정결과를 제공하는 API",
+            responses = {@ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "404", description = "Page Not Found!"),})
     @PostMapping(value = "noticeUpdate")
     public MsgDTO noticeUpdate(HttpServletRequest request,
                                @CookieValue(value = "${jwt.token.access.name}") String token) {
@@ -160,7 +166,7 @@ public class NoticeController {
         MsgDTO dto = null; // 결과 메시지 구조
 
         try {
-            TokenDTO tDTO = tokenAPIService.getTokenInfo(token); // UserService로부터 Token 값 받아오기
+            TokenDTO tDTO = tokenAPIService.getTokenInfo(HEADER_PREFIX + token); // UserService로부터 Token 값 받아오기
             log.info("TokenDTO : " + tDTO); // Token 값 출력하기
 
             String userId = CmmUtil.nvl(tDTO.userId());
@@ -191,6 +197,7 @@ public class NoticeController {
 
             msg = "수정되었습니다.";
             res = 0;
+
         } catch (Exception e) {
             msg = "실패하였습니다. : " + e.getMessage();
             log.info(e.toString());
@@ -208,7 +215,9 @@ public class NoticeController {
         return dto;
     }
 
-    @Operation(summary = "공지사항 삭제 API", description = "공지사항 삭제 및 삭제결과를 제공하는 API", responses = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "Page Not Found!"),})
+    @Operation(summary = "공지사항 삭제 API", description = "공지사항 삭제 및 삭제결과를 제공하는 API",
+            responses = {@ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "404", description = "Page Not Found!"),})
     @PostMapping(value = "noticeDelete")
     public MsgDTO noticeDelete(HttpServletRequest request) {
 

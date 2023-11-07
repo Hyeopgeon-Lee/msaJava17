@@ -1,29 +1,11 @@
 package kopo.poly.config;
 
 import feign.Logger;
-import feign.RequestInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class OpenFeignConfig {
-
-    // API 접속을 위해 접속 방법은 기본 값으로 설정함(반드시 설정되어야 함)
-//    @Bean
-////    public Contract feignContract() {
-//        return new Contract.Default();
-////    }
-
-
-    @Bean
-    public RequestInterceptor requestInterceptor() {
-
-
-        return requestTemplate -> {
-
-
-        };
-    }
 
     @Bean
     Logger.Level feignLoggerLevel() {

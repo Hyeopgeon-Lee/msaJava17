@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 
-@FeignClient(name = "ITokenAPIService", url = "http://localhost:13000")
+@FeignClient(name = "ITokenAPIService", url = "http://localhost:11000")
 public interface ITokenAPIService {
 
     @PostMapping(value = "/user/getTokenInfo")
