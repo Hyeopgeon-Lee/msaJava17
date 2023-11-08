@@ -1,13 +1,14 @@
 package kopo.poly.service;
 
 import kopo.poly.dto.TokenDTO;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-
-@FeignClient(name = "ITokenAPIService", url = "http://localhost:11000")
+@RefreshScope
+@FeignClient(name = "ITokenAPIService", url = "${api.gateway}")
 public interface ITokenAPIService {
 
     @PostMapping(value = "/user/getTokenInfo")

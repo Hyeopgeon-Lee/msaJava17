@@ -32,7 +32,7 @@ public class NoticeController {
 
     private final ITokenAPIService tokenAPIService;
 
-    public static final String HEADER_PREFIX = "Bearer "; // Bearer 토큰 사용을 위한 선언 값
+    private final String HEADER_PREFIX = "Bearer "; // Bearer 토큰 사용을 위한 선언 값
 
     @Operation(summary = "공지사항 리스트 API", description = "공지사항 리스트 정보 제공하는 API", responses = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "Page Not Found!"),})
     @PostMapping(value = "noticeList")
