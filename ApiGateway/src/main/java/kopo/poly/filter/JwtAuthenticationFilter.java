@@ -96,7 +96,7 @@ public class JwtAuthenticationFilter implements WebFilter {
         log.info("request :" + request);
         log.info("request :" + request.getPath());
 
-        // 쿠키에서 Access Token 가져오기
+        // 쿠키 or HTTP 인증헤더에서 Access Token 가져오기
         String accessToken = CmmUtil.nvl(jwtTokenProvider.resolveToken(request, JwtTokenType.ACCESS_TOKEN));
 
         log.info("accessToken : " + accessToken);

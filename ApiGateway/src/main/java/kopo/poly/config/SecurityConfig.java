@@ -32,11 +32,8 @@ public class SecurityConfig {
 
         log.info(this.getClass().getName() + ".filterChain Start!");
 
-        // POST 방식 전송을 위해 csrf 막기
-        http.csrf(ServerHttpSecurity.CsrfSpec::disable);
-
-        http.cors(ServerHttpSecurity.CorsSpec::disable);
-
+        http.csrf(ServerHttpSecurity.CsrfSpec::disable); // POST 방식 전송을 위해 csrf 막기
+        http.cors(ServerHttpSecurity.CorsSpec::disable); // CORS 사용하지 않음
         http.formLogin(ServerHttpSecurity.FormLoginSpec::disable); // 로그인 기능 사용하지 않음
 
         http.exceptionHandling(exceptionHandlingSpec ->
@@ -64,7 +61,7 @@ public class SecurityConfig {
                         .anyExchange().permitAll() // 그 외 나머지 url 요청은 인증 받지 않아도 접속 가능함
         );
 
-        // Spring Cloud Security 필터들이 실행되기 전에 JWT 검증 필터 실행
+        // Spring Security 필터들이 실행되기 전에 JWT 필터 실행
         http.addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.HTTP_BASIC);
 
         log.info(this.getClass().getName() + ".filterChain End!");
