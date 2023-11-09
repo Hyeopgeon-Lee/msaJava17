@@ -65,8 +65,6 @@ public class JwtTokenProvider {
         claims.put("roles", roles); // JWT Paylaod에 정의된 기본 옵션 외 정보를 추가 - 사용자 권한 추가
         Date now = new Date();
 
-        log.info(this.getClass().getName() + ".createToken End!");
-
         // 보안키 문자들을 JWT Key 형태로 변경하기
         SecretKey secret = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
 
@@ -77,6 +75,7 @@ public class JwtTokenProvider {
                 .setExpiration(new Date(now.getTime() + (accessTokenValidTime * 1000))) // set Expire Time
                 .signWith(secret, SignatureAlgorithm.HS256)  // 사용할 암호화 알고리즘과
                 .compact();
+
     }
 
     /**
@@ -110,8 +109,10 @@ public class JwtTokenProvider {
     }
 
     /**
-     * JWT 토큰(Access Token, Refresh Token)에서 인증 정보 조회 및
-     * 아이디, 패스워드가 맞다면, Spring Security를 통해 로그인처리하기
+     * Access Token의 userId, roles 가져옴
+     * userId와 roles 값을 Spring Security 인증되었다고 Spring Security 인증 토큰 생성
+     * JWT 토큰은 로그인 되었기에 생성됨
+     * 즉, JWT 토큰이 있으면, 로그인이 된 상태
      *
      * @param token 토큰
      * @return 인증 처리한 정보(로그인 성공, 실패)
@@ -148,7 +149,9 @@ public class JwtTokenProvider {
     }
 
     /**
-     * 쿠기에 저장된 JWT 토큰(Access Token, Refresh Token) 가져오기
+     * 쿠기에 저장 및 HTTP 인증 헤더에 저장된 JWT 토큰(Access Token, Refresh Token) 가져오기
+     * 쿠키 : Access Token, Refresh Token 저장됨
+     * HTTP 인증 헤더 : Bearer 토큰으로 Access Token만 저장됨
      *
      * @param request   request 정보
      * @param tokenType token 유형
