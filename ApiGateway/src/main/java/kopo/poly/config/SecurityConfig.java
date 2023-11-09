@@ -19,10 +19,9 @@ import org.springframework.security.web.server.context.NoOpServerSecurityContext
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
-    // Access Denied 처리
-    private final AccessDeniedHandler accessDeniedHandler;
+    private final AccessDeniedHandler accessDeniedHandler; // 인증 에러 처리
 
-    private final LoginServerAuthenticationEntryPoint loginServerAuthenticationEntryPoint;
+    private final LoginServerAuthenticationEntryPoint loginServerAuthenticationEntryPoint; // 인가 에러 처리
 
     // JWT 검증을 위한 필터
     // 초기 Spring Filter를 Spring에 제어가 불가능했지만, 현재 제어 가능함
@@ -38,9 +37,13 @@ public class SecurityConfig {
 
         http.cors(ServerHttpSecurity.CorsSpec::disable);
 
-        http.formLogin(ServerHttpSecurity.FormLoginSpec::disable);
-        http.exceptionHandling(exceptionHandlingSpec -> exceptionHandlingSpec.accessDeniedHandler(accessDeniedHandler));
-        http.exceptionHandling(exceptionHandlingSpec -> exceptionHandlingSpec.authenticationEntryPoint(loginServerAuthenticationEntryPoint));
+        http.formLogin(ServerHttpSecurity.FormLoginSpec::disable); // 로그인 기능 사용하지 않음
+
+        http.exceptionHandling(exceptionHandlingSpec ->
+                exceptionHandlingSpec.accessDeniedHandler(accessDeniedHandler)); // 인증 에러 처리
+
+        http.exceptionHandling(exceptionHandlingSpec ->
+                exceptionHandlingSpec.authenticationEntryPoint(loginServerAuthenticationEntryPoint)); // 인가 에러 처리
 
         // stateless방식의 애플리케이션이 되도록 설정
         http.securityContextRepository(NoOpServerSecurityContextRepository.getInstance());
@@ -61,7 +64,7 @@ public class SecurityConfig {
                         .anyExchange().permitAll() // 그 외 나머지 url 요청은 인증 받지 않아도 접속 가능함
         );
 
-        // Spring Cloud Security의 필터들이 실행되기 전에 JWT 검증 필터 실행
+        // Spring Cloud Security 필터들이 실행되기 전에 JWT 검증 필터 실행
         http.addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.HTTP_BASIC);
 
         log.info(this.getClass().getName() + ".filterChain End!");

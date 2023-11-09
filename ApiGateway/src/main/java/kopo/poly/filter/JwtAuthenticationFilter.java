@@ -26,8 +26,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter implements WebFilter {
 
-    public static final String HEADER_PREFIX = "Bearer ";
-
     @Value("${jwt.token.access.valid.time}")
     private long accessTokenValidTime;
 
