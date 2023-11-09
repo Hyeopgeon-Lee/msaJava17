@@ -1,6 +1,8 @@
 package kopo.poly.jwt;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import kopo.poly.dto.TokenDTO;
 import kopo.poly.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -28,7 +31,7 @@ public class JwtTokenProvider {
     @Value("${jwt.secret.key}")
     private String secretKey;
 
-    @Value("${jwtw.token.creator}")
+    @Value("${jwt.token.creator}")
     private String creator;
 
     @Value("${jwt.token.access.valid.time}")
@@ -64,12 +67,15 @@ public class JwtTokenProvider {
 
         log.info(this.getClass().getName() + ".createToken End!");
 
+        // 보안키 문자들을 JWT Key 형태로 변경하기
+        SecretKey secret = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
+
         // Builder를 통해 토큰 생성
         return Jwts.builder()
                 .setClaims(claims) // 정보 저장
                 .setIssuedAt(now) // 토큰 발행 시간 정보
                 .setExpiration(new Date(now.getTime() + (accessTokenValidTime * 1000))) // set Expire Time
-                .signWith(SignatureAlgorithm.HS256, secretKey)  // 사용할 암호화 알고리즘과
+                .signWith(secret, SignatureAlgorithm.HS256)  // 사용할 암호화 알고리즘과
                 .compact();
     }
 
@@ -83,8 +89,11 @@ public class JwtTokenProvider {
 
         log.info(this.getClass().getName() + ".getTokenInfo Start!");
 
+        // 보안키 문자들을 JWT Key 형태로 변경하기
+        SecretKey secret = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
+
         // JWT 토큰 정보
-        Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+        Claims claims = Jwts.parserBuilder().setSigningKey(secret).build().parseClaimsJws(token).getBody();
 
         String userId = CmmUtil.nvl(claims.getSubject());
         String role = CmmUtil.nvl((String) claims.get("roles")); // LoginService 생성된 토큰의 권한명과 동일
@@ -92,11 +101,12 @@ public class JwtTokenProvider {
         log.info("userId : " + userId);
         log.info("role : " + role);
 
-        TokenDTO pDTO = TokenDTO.builder().userId(userId).role(role).build();
+        // TokenDTO는 자바17의 Record 객체 사용했기에 빌더패턴 적용함
+        TokenDTO rDTO = TokenDTO.builder().userId(userId).role(role).build();
 
         log.info(this.getClass().getName() + ".getTokenInfo End!");
 
-        return pDTO;
+        return rDTO;
     }
 
     /**
@@ -193,12 +203,15 @@ public class JwtTokenProvider {
     public JwtStatus validateToken(String token) {
 
         if (token.length() > 0) {
-
             try {
-                Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+                // 보안키 문자들을 JWT Key 형태로 변경하기
+                SecretKey secret = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
+
+                // JWT 토큰 정보
+                Claims claims = Jwts.parserBuilder().setSigningKey(secret).build().parseClaimsJws(token).getBody();
 
                 // 토큰 만료여부 체크
-                if (claims.getBody().getExpiration().before(new Date())) {
+                if (claims.getExpiration().before(new Date())) {
                     return JwtStatus.EXPIRED; // 기간 만료
 
                 } else {
