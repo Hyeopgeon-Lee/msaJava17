@@ -27,8 +27,8 @@ public class CmmUtil {
 	}
 	
 	public static String checked(String[] str, String com_str){
-		for(int i=0;i<str.length;i++){
-			if(str[i].equals(com_str))
+		for (String s : str) {
+			if (s.equals(com_str))
 				return " checked";
 		}
 		return "";
