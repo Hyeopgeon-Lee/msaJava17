@@ -30,9 +30,7 @@ public class AccessDeniedHandler implements ServerAccessDeniedHandler {
         response.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
         // 에러 메시지 구조
-        MsgDTO pDTO = new MsgDTO();
-        pDTO.setCode("600");
-        pDTO.setMsg(ErrorMsg.ERR600.getValue());
+        MsgDTO pDTO = MsgDTO.builder().result(600).msg(ErrorMsg.ERR600.getValue()).build();
 
         // DTO를 JSON 구조로 변경하기
         String json = null;

@@ -25,17 +25,12 @@ public class LoginServerAuthenticationEntryPoint implements ServerAuthentication
     public Mono<Void> commence(ServerWebExchange exchange, AuthenticationException ex) {
 
         ServerHttpResponse response = exchange.getResponse();
-//
-//        ServerHttpRequest request = exchange.getRequest();
-//
-//        request.
+
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
         response.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
         // 에러 메시지 구조
-        MsgDTO pDTO = new MsgDTO();
-        pDTO.setCode("100");
-        pDTO.setMsg(ErrorMsg.ERR100.getValue());
+        MsgDTO pDTO = MsgDTO.builder().result(100).msg(ErrorMsg.ERR100.getValue()).build();
 
         // DTO를 JSON 구조로 변경하기
         String json = null;

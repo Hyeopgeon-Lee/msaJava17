@@ -44,6 +44,6 @@ dependencyManagement {
     }
 }
 
-tasks.named('test') {
+tasks.named('test') {D
     useJUnitPlatform()
 }
