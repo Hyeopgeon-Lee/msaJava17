@@ -23,6 +23,7 @@ repositories {
 
 ext {
 	set('springCloudVersion', "2022.0.4")
+	set('springBootAdminVersion', "3.1.4")
 }
 
 dependencies {
@@ -36,6 +37,7 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+	implementation 'de.codecentric:spring-boot-admin-starter-client'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -45,6 +47,7 @@ dependencies {
 
 dependencyManagement {
 	imports {
+		mavenBom "de.codecentric:spring-boot-admin-dependencies:${springBootAdminVersion}"
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
 	}
 }

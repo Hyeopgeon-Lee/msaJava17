@@ -14,10 +14,30 @@
         let userId = ""; // 공지사항 게시글 작성자 아이디
         const nSeq = param.get("nSeq"); // night; // 현재 글번호
 
+        // 로그인 여부 체크 및 사용자 아이디 가져오기
+        // 회원아이디가 존재하지 않으면, 로그인 안된 것으로 판단
+        function loginInfo() {
+
+            loginCheck(); // 로그인 여부 체크하기
+
+            $.ajax({ //회원 아이디 가져오기
+                url: "http://" + apiServer + "/user/getTokenInfo",
+                type: "post", // 전송방식은 Post
+                dataType: "JSON", // 전송 결과는 JSON으로 받기
+                xhrFields: { // CORS 해결을 위해 인증 정보 포함하여 전달하도록 설정
+                    withCredentials: true
+                }
+            }).then(function (json) {
+                loginUserId = json.userId;
+
+            });
+        }
+
         // HTML로딩이 완료되고, 실행됨
         $(document).ready(function () {
 
-            loginInfo(); // 로그인된 사용자 아이디 가져오기
+            loginUserId = loginInfo(); // 로그인된 사용자 아이디 가져오기
+
             getNoticeInfo(); // 공지사항 상세 내역 가져오기
 
             $("#btnEdit").on("click", function () { // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
@@ -32,26 +52,6 @@
                 location.href = "/notice/noticeList.html"; // 공지사항 리스트 이동
             })
         })
-
-        // 로그인된 사용자 아이디 가져오기
-        function loginInfo() {
-            $.ajax({
-                url: "http://" + apiServer + "/user/getTokenInfo",
-                type: "post", // 전송방식은 Post
-                dataType: "JSON", // 전송 결과는 JSON으로 받기
-                xhrFields: {
-                    withCredentials: true
-                }
-            }).then(function (json) {
-                loginUserId = json.userId;
-
-                if (loginUserId === "") {
-                    alert("접근 권한이 없습니다.");
-                    location.href = loginPage;
-                }
-
-            });
-        }
 
         // 공지사항 상세 조회하기
         function getNoticeInfo() {

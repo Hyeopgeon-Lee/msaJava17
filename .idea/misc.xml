@@ -3,6 +3,7 @@
   <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="web" url="file://$PROJECT_DIR$/ApiGateway" />
+    <file type="web" url="file://$PROJECT_DIR$/AppManager" />
     <file type="web" url="file://$PROJECT_DIR$/EurekaServer" />
     <file type="web" url="file://$PROJECT_DIR$/FrontUI" />
     <file type="web" url="file://$PROJECT_DIR$/NoticeService" />
