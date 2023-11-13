@@ -18,15 +18,15 @@ public class RoutConfig {
     @Bean
     public RouteLocator gatewayRoutes(RouteLocatorBuilder builder) {
         return builder.routes().route(r -> r.path("/notice/**") // 공지사항
-                .uri("http://localhost:12000") // 연결될 서버 주소
+                .uri("lb://NOTICE-SERVICE:12000") // 연결될 서버 주소
         ).route(r -> r.path("/user/**") // 회원정보 확인
-                .uri("http://localhost:11000") // 연결될 서버 주소
+                .uri("lb://USER-SERVICE:11000") // 연결될 서버 주소
 
         ).route(r -> r.path("/login/**") // 로그인 => 로그인이 필요하지 않는 서비스를 별로 URL로 분리
-                .uri("http://localhost:11000") // 연결될 서버 주소
+                .uri("lb://USER-SERVICE:11000") // 연결될 서버 주소
 
         ).route(r -> r.path("/reg/**") // 회원가입 => 로그인이 필요하지 않는 서비스를 별로 URL로 분리
-                .uri("http://localhost:11000") // 연결될 서버 주소
+                .uri("lb://USER-SERVICE:11000") // 연결될 서버 주소
         ).build();
     }
 }
