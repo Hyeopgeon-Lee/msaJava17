@@ -27,6 +27,6 @@ Spring 3.x와 자바17을 적용한 MSA 실습 프로그래밍 코드 공유하�
 8. JWT 토큰 기반 공지사항 구현(Spring Boot Frameworks, Spring Data JPA 적용)
 
 
-## 학과 수업에 대한 궁금증은 학과 오픈채팅방에 문의 : 
+## 학과 수업에 대한 궁금증은 학과 오픈채팅방에 문의
 * https://open.kakao.com/o/gEd0JIad
 
