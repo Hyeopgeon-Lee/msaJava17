@@ -16,41 +16,48 @@
         // HTML로딩이 완료되고, 실행됨
         $(document).ready(function () {
 
-            $.ajax({ // Ajax 호출
-                url: "http://" + apiServer + "/notice/noticeList",
+            // Ajax 호출해서 멜론차트 조회하기
+            $.ajax({
+                url: "http://" + apiServer + "/notice/vi/noticeList",
                 type: "post", // 전송방식은 Post
                 xhrFields: {
                     withCredentials: true
                 },
-                dataType: "JSON", // 전송 결과는 JSON으로 받기
-                success: function (json) { // Ajax 요청이 성공했다면...
-                    for (let i = 0; i < json.length; i++) {
+                dataType: "JSON" // 전송 결과는 JSON으로 받기
+            }).then(
+                function (json) { // 성공
+
+                    $("#noticeList").empty(); // 기존 조회 내용 지우기
+
+                    const result = json.data;
+
+                    for (const data of result) {
                         $("#noticeList").append("<div class=\"divTableRow\">");
 
-                        if (json[i].noticeYn === "Y") { // 글번호 출력
+                        if (data.noticeYn === "Y") { // 글번호 출력
                             $("#noticeList").append("<div class=\"divTableCell\">공지사항</div>");
 
                         } else {
-                            $("#noticeList").append("<div class=\"divTableCell\">" + json[i].noticeSeq + "</div>");
+                            $("#noticeList").append("<div class=\"divTableCell\">" + data.noticeSeq + "</div>");
 
                         }
 
                         $("#noticeList").append(
-                            "<div class=\"divTableCell\" onclick='doDetail(" + json[i].noticeSeq + ")'>"
-                            + json[i].title + "</div>");
-                        $("#noticeList").append("<div class=\"divTableCell\">" + json[i].readCnt + "</div>");
-                        $("#noticeList").append("<div class=\"divTableCell\">" + json[i].userId + "</div>");
-                        $("#noticeList").append("<div class=\"divTableCell\">" + json[i].regDt + "</div>");
+                            "<div class=\"divTableCell\" onclick='doDetail(" + data.noticeSeq + ")'>"
+                            + data.title + "</div>");
+                        $("#noticeList").append("<div class=\"divTableCell\">" + data.readCnt + "</div>");
+                        $("#noticeList").append("<div class=\"divTableCell\">" + data.userId + "</div>");
+                        $("#noticeList").append("<div class=\"divTableCell\">" + data.regDt + "</div>");
+                        $("#noticeList").append("</div>");
                     }
+
                 },
-                // error: function (request, status, error) {
-                error: function () {
+                function () {
                     alert("접근 권한이 없습니다.");
                     location.href = loginPage;
-
                 }
+            );
 
-            })
         })
     </script>
 </head>
