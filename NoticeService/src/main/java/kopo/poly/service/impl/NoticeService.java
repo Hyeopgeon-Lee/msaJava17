@@ -1,7 +1,5 @@
 package kopo.poly.service.impl;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import kopo.poly.dto.NoticeDTO;
 import kopo.poly.repository.NoticeRepository;
@@ -34,9 +32,7 @@ public class NoticeService implements INoticeService {
         List<NoticeEntity> rList = noticeRepository.findAllByOrderByNoticeSeqDesc();
 
         // 엔티티의 값들을 DTO에 맞게 넣어주기
-        List<NoticeDTO> nList = new ObjectMapper().convertValue(rList,
-                new TypeReference<List<NoticeDTO>>() {
-                });
+        List<NoticeDTO> nList = NoticeDTO.from(rList);
 
         log.info(this.getClass().getName() + ".getNoticeList End!");
 
@@ -61,7 +57,7 @@ public class NoticeService implements INoticeService {
         NoticeEntity rEntity = noticeRepository.findByNoticeSeq(pDTO.noticeSeq());
 
         // 엔티티의 값들을 DTO에 맞게 넣어주기
-        NoticeDTO rDTO = new ObjectMapper().convertValue(rEntity, NoticeDTO.class);
+        NoticeDTO rDTO = NoticeDTO.from(rEntity);
 
         log.info(this.getClass().getName() + ".getNoticeInfo End!");
 
