@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/css/table.css"/>
     <script type="text/javascript" src="/js/common.js"></script>
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.serializeObject.min.js"></script>
     <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
 
@@ -43,26 +44,34 @@
 
                 // Ajax 호출해서 로그인하기
                 $.ajax({
-                    url: "http://" + apiServer + "/login/loginProc",
+                    url: "http://" + apiServer + "/login/v1/loginProc",
                     type: "post", // 전송방식은 Post
-                    dataType: "JSON", // 전송 결과는 JSON으로 받기
+                    // contentType: "application/json",
                     xhrFields: {
                         withCredentials: true
                     },
+                    dataType: "JSON", // 전송 결과는 JSON으로 받기
                     data: $("#f").serialize(), // form 태그 내 input 등 객체를 자동으로 전송할 형태로 변경하기
-                    success: function (json) { // /notice/noticeUpdate 호출이 성공했다면..
+                }).then(
+                    function (json) { // 성공
 
-                        if (json.result === 1) { // 로그인 성공
-                            alert(json.msg); // 메시지 띄우기
+                        if (json.data.result === 1) { // 로그인 성공
+                            alert(json.data.msg); // 메시지 띄우기
                             location.href = "/user/loginResult.html"; // 로그인 성공 페이지 이동
 
                         } else { // 로그인 실패
-                            alert(json.msg); // 메시지 띄우기
+                            alert(json.data.msg); // 메시지 띄우기
                             $("#user_id").focus(); // 아이디 입력 항목에 마우스 커서 이동
                         }
 
+                    },
+                    function () {
+                        alert("에러가 발생하였습니다. \n다음에 다시 시도하길 바랍니다."); // 메시지 띄우기
+                        $("#user_id").focus(); // 아이디 입력 항목에 마우스 커서 이동
+
                     }
-                })
+                );
+
             })
         })
     </script>

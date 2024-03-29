@@ -6,40 +6,59 @@
     <link rel="stylesheet" href="/css/table.css"/>
     <script type="text/javascript" src="/js/common.js"></script>
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
     <script type="text/javascript">
 
         // HTML로딩이 완료되고, 실행됨
         $(document).ready(function () {
 
-            loginCheck(); // 로그인 여부 체크하기
+            // loginCheck(); // 로그인 여부 체크하기
 
             // 로그아웃
             $("#btnLogout").on("click", function () { // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
-                location.href = "/user/logout";
+                // Ajax 호출해서 멜론차트 조회하기
+                $.ajax({
+                    url: "http://" + apiServer + "/user/v1/logout",
+                    type: "post", // 전송방식은 Post
+                    xhrFields: { // CORS 문제를 해결하기 위해 인증 Credentials 정보를 전달(서버쪽도 반드시 설정되어야 함)
+                        withCredentials: true
+                    },
+                    dataType: "JSON", // 전송 결과는 JSON으로 받기
+                }).then(
+                    function () { // 성공
+                        alert("로그아웃 되었습니다.");
+                        location.href = loginPage;
+
+                    }
+                );
             })
 
             // 회원정보 상세 조회하기
-            $.ajax({ // Ajax 호출
-                url: "http://" + apiServer + "/user/userInfo",
+            $.ajax({
+                url: "http://" + apiServer + "/user/v1/userInfo",
                 type: "post", // 전송방식은 Post
                 xhrFields: { // CORS 문제를 해결하기 위해 인증 Credentials 정보를 전달(서버쪽도 반드시 설정되어야 함)
                     withCredentials: true
                 },
                 dataType: "JSON", // 전송 결과는 JSON으로 받기
-                success: function (json) { // Ajax 요청이 성공했다면...
-                    $("#userId").append(json.userId);
-                    $("#userName").append(json.userName);
-                    $("#email").append(json.email);
-                    $("#addr1").append(json.addr1);
-                    $("#addr2").append(json.addr2);
-                },
-                // error: function (request, status, error) {
-                error: function () {
+
+            }).then(
+                function (json) { // 성공
+
+                    const result = json.data;
+
+                    $("#userId").append(result.userId);
+                    $("#userName").append(result.userName);
+                    $("#email").append(result.email);
+                    $("#addr1").append(result.addr1);
+                    $("#addr2").append(result.addr2);
+
+                }, function () { // 실패
                     alert("접근 권한이 없습니다.");
                     location.href = loginPage;
-
                 }
-            })
+            );
         })
     </script>
 </head>

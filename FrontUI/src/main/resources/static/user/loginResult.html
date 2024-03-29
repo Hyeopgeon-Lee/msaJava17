@@ -21,25 +21,24 @@
                 location.href = "/notice/noticeList.html";
             })
 
-            $.ajax({ // Ajax 호출
-                url: "http://" + apiServer + "/user/userInfo",
+            // Ajax 호출해서 멜론차트 조회하기
+            $.ajax({
+                url: "http://" + apiServer + "/user/v1/userInfo",
                 type: "post", // 전송방식은 Post
                 xhrFields: { // CORS 문제를 해결하기 위해 인증 Credentials 정보를 전달(서버쪽도 반드시 설정되어야 함)
                     withCredentials: true
                 },
                 dataType: "JSON", // 전송 결과는 JSON으로 받기
-                success: function (json) { // Ajax 요청이 성공했다면...
-                    $("#loginUserId").append(json.userId + "님이 로그인하였습니다.");
+            }).then(
+                function (json) { // 성공
+                    $("#loginUserId").append(json.data.userId + "님이 로그인하였습니다.");
 
-                },
-                // error: function (request, status, error) {
-                error: function () {
+                }, function () { // 실패
                     alert("접근 권한이 없습니다.");
                     location.href = loginPage;
 
                 }
-            })
-
+            );
         })
     </script>
 </head>
