@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import kopo.poly.auth.UserRole;
+import kopo.poly.controller.response.CommonResponse;
 import kopo.poly.dto.MsgDTO;
 import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.service.IUserInfoSsService;
@@ -12,6 +13,8 @@ import kopo.poly.util.CmmUtil;
 import kopo.poly.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,7 +44,7 @@ public class UserRegController {
             }
     )
     @PostMapping(value = "insertUserInfo")
-    public MsgDTO insertUserInfo(HttpServletRequest request) {
+    public ResponseEntity<CommonResponse> insertUserInfo(HttpServletRequest request) {
 
         log.info(this.getClass().getName() + ".insertUserInfo start!");
 
@@ -135,7 +138,6 @@ public class UserRegController {
             msg = "실패하였습니다. : " + e;
             res = 2;
             log.info(e.toString());
-            e.printStackTrace();
 
         } finally {
             dto = MsgDTO.builder().result(res).msg(msg).build();
@@ -144,7 +146,8 @@ public class UserRegController {
 
         }
 
-        return dto;
+        return ResponseEntity.ok(
+                CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto));
     }
 
 }

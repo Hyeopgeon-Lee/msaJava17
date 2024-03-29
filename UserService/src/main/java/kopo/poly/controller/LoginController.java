@@ -7,13 +7,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import kopo.poly.auth.AuthInfo;
 import kopo.poly.auth.JwtTokenProvider;
 import kopo.poly.auth.JwtTokenType;
+import kopo.poly.controller.response.CommonResponse;
 import kopo.poly.dto.MsgDTO;
 import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,12 +26,14 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Optional;
 
 
-@CrossOrigin(origins = {"http://localhost:13000", "http://localhost:14000"},
+@CrossOrigin(origins = {
+        "http://localhost:11000",
+        "http://localhost:13000", "http://localhost:14000"},
         allowedHeaders = {"POST, GET"},
         allowCredentials = "true")
 @Tag(name = "로그인 관련 API", description = "로그인 관련 API 설명입니다.")
 @Slf4j
-@RequestMapping(value = "/login")
+@RequestMapping(value = "/login/v1")
 @RequiredArgsConstructor
 @RestController
 public class LoginController {
@@ -54,8 +59,8 @@ public class LoginController {
             }
     )
     @PostMapping(value = "loginSuccess")
-    public MsgDTO loginSuccess(@AuthenticationPrincipal AuthInfo authInfo,
-                               HttpServletResponse response) {
+    public ResponseEntity<CommonResponse> loginSuccess(@AuthenticationPrincipal AuthInfo authInfo,
+                                                       HttpServletResponse response) {
 
         log.info(this.getClass().getName() + ".loginSuccess Start!");
 
@@ -116,7 +121,8 @@ public class LoginController {
 
         log.info(this.getClass().getName() + ".loginSuccess End!");
 
-        return dto;
+        return ResponseEntity.ok(
+                CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto));
 
     }
 
@@ -127,7 +133,7 @@ public class LoginController {
             }
     )
     @PostMapping(value = "loginFail")
-    public MsgDTO loginFail() {
+    public ResponseEntity<CommonResponse> loginFail() {
 
         log.info(this.getClass().getName() + ".loginFail Start!");
 
@@ -136,7 +142,8 @@ public class LoginController {
 
         log.info(this.getClass().getName() + ".loginFail End!");
 
-        return dto;
+        return ResponseEntity.ok(
+                CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto));
 
     }
 
