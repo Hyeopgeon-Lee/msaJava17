@@ -18,19 +18,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
 
-@CrossOrigin(origins = {
-        "http://localhost:11000",
-        "http://localhost:13000", "http://localhost:14000"},
-        allowedHeaders = {"POST, GET"},
-        allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:13000", "http://localhost:14000"},
+        allowCredentials = "true",
+        allowedHeaders = {"Content-Type"},
+        methods = {RequestMethod.POST, RequestMethod.GET},
+        originPatterns = {"login/**"}
+)
 @Tag(name = "로그인 관련 API", description = "로그인 관련 API 설명입니다.")
 @Slf4j
 @RequestMapping(value = "/login/v1")
