@@ -34,6 +34,7 @@ public class SecurityConfig {
 
         http.csrf(ServerHttpSecurity.CsrfSpec::disable); // POST 방식 전송을 위해 csrf 막기
         http.cors(ServerHttpSecurity.CorsSpec::disable); // CORS 사용하지 않음
+
         http.formLogin(ServerHttpSecurity.FormLoginSpec::disable); // 로그인 기능 사용하지 않음
 
         http.exceptionHandling(exceptionHandlingSpec ->
@@ -47,15 +48,15 @@ public class SecurityConfig {
 
         http.authorizeExchange(authz -> authz // 페이지 접속 권한 설정
                         // USER 권한
-                        .pathMatchers("/notice/**").hasAnyAuthority("ROLE_USER")
+                        .pathMatchers("/notice/v1/**").hasAnyAuthority("ROLE_USER")
 //                        .pathMatchers("/notice/**").permitAll()
 
                         // USER 권한
-                        .pathMatchers("/user/**").hasAnyAuthority("ROLE_USER")
+                        .pathMatchers("/user/v1/**").hasAnyAuthority("ROLE_USER")
 
-                        .pathMatchers("/login/**").permitAll()
+                        .pathMatchers("/login/v1/**").permitAll()
 
-                        .pathMatchers("/reg/**").permitAll()
+                        .pathMatchers("/reg/v1/**").permitAll()
 
 //                        .anyExchange().authenticated() // 그외 나머지 url 요청은 인증된 사용자만 가능
                         .anyExchange().permitAll() // 그 외 나머지 url 요청은 인증 받지 않아도 접속 가능함

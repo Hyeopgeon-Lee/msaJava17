@@ -158,12 +158,6 @@ public class JwtAuthenticationFilter implements WebFilter {
                 return chain.filter(exchange)
                         .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
 
-            } else if (refreshTokenStatus == JwtStatus.EXPIRED) {
-                log.info("Refresh Token 만료 - 스프링 시큐리티가 로그인 페이지로 이동 시킴");
-
-            } else {
-                log.info("Refresh Token 오류 - 스프링 시큐리티가 로그인 페이지로 이동 시킴");
-
             }
 
         }
