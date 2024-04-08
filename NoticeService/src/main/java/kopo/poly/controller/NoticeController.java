@@ -24,7 +24,11 @@ import java.util.List;
 import java.util.Optional;
 
 @CrossOrigin(origins = {"http://localhost:13000", "http://localhost:14000"},
-        allowedHeaders = {"POST, GET"}, allowCredentials = "true")
+        allowCredentials = "true",
+        allowedHeaders = {"Content-Type"},
+        methods = {RequestMethod.POST, RequestMethod.GET},
+        originPatterns = {"notice/**"}
+)
 @Tag(name = "공지사항 서비스", description = "공지사항 구현을 위한 API")
 @Slf4j
 @RequestMapping(value = "/notice/v1")
@@ -92,7 +96,7 @@ public class NoticeController {
             responses = {@ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "404", description = "Page Not Found!"),})
     @PostMapping(value = "noticeInsert")
-    public ResponseEntity<CommonResponse> noticeInsert(@Valid @RequestBody NoticeDTO pDTO, BindingResult bindingResult,
+    public ResponseEntity<CommonResponse> noticeInsert(@RequestBody NoticeDTO pDTO, BindingResult bindingResult,
                                                        @CookieValue(value = "${jwt.token.access.name}") String token) {
 
         log.info(this.getClass().getName() + ".noticeInsert Start!");

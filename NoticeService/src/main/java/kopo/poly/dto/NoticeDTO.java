@@ -58,6 +58,7 @@ public record NoticeDTO(
                 .noticeYn(entity.getNoticeYn())
                 .contents(entity.getContents())
                 .userId(entity.getUserId())
+                .userName(entity.getUserInfo().getUserName())
                 .readCnt(entity.getReadCnt())
                 .regId(entity.getRegId())
                 .regDt(entity.getRegDt())

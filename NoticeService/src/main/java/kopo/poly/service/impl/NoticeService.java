@@ -29,7 +29,7 @@ public class NoticeService implements INoticeService {
         log.info(this.getClass().getName() + ".getNoticeList Start!");
 
         // 공지사항 전체 리스트 조회하기
-        List<NoticeEntity> rList = noticeRepository.findAllByOrderByNoticeSeqDesc();
+        List<NoticeEntity> rList = noticeRepository.getNoticeList();
 
         // 엔티티의 값들을 DTO에 맞게 넣어주기
         List<NoticeDTO> nList = NoticeDTO.from(rList);

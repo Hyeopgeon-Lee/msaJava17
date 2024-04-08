@@ -12,7 +12,8 @@ import java.util.List;
 @Repository
 public interface NoticeRepository extends JpaRepository<NoticeEntity, Long> {
 
-    List<NoticeEntity> findAllByOrderByNoticeSeqDesc();
+    @Query("SELECT A FROM NoticeEntity  A JOIN FETCH A.userInfo ORDER BY A.noticeYn desc , A.noticeSeq DESC")
+    List<NoticeEntity> getNoticeList();
 
     NoticeEntity findByNoticeSeq(Long noticeSeq);
 
