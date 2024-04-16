@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="/css/table.css"/>
     <script type="text/javascript" src="/js/common.js"></script>
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.serializeObject.min.js"></script>
     <script type="text/javascript">
 
         // HTML로딩이 완료되고, 실행됨
@@ -55,21 +56,24 @@
                 return;
             }
 
-            // Ajax 호출해서 글 등록하기
-            $.ajax({
-                    url: "http://" + apiServer + "/notice/noticeInsert",
-                    type: "post", // 전송방식은 Post
-                    dataType: "JSON", // 전송 결과는 JSON으로 받기
-                    data: $("#f").serialize(), // form 태그 내 input 등 객체를 자동으로 전송할 형태로 변경하기
-                    xhrFields: {
-                        withCredentials: true
-                    },
-                    success: function (json) { // /notice/noticeInsert 호출이 성공했다면..
-                        alert(json.msg); // 메시지 띄우기
-                        location.href = "/notice/noticeList.html"; // 공지사항 리스트 이동
-                    }
+            $.ajax({ // Ajax 호출해서 공지사항 등록하기
+                url: "http://" + apiServer + "/notice/v1/noticeInsert",
+                type: "post", // 전송방식은 Post
+                xhrFields: {
+                    withCredentials: true
+                },
+                contentType: "application/json",
+                dataType: "JSON", // 전송 결과는 JSON으로 받기
+                data: JSON.stringify($("#f").serializeObject())// form 태그 내 input 등 객체를 자동으로 전송할 형태로 변경하기
+
+            }).then(
+                function (json) { // 성공
+
+                    alert(json.msg); // 메시지 띄우기
+                    location.href = "/notice/noticeList.html"; // 공지사항 리스트 이동
+
                 }
-            )
+            );
         }
     </script>
 </head>

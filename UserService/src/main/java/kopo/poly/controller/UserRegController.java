@@ -8,7 +8,7 @@ import kopo.poly.auth.UserRole;
 import kopo.poly.controller.response.CommonResponse;
 import kopo.poly.dto.MsgDTO;
 import kopo.poly.dto.UserInfoDTO;
-import kopo.poly.service.IUserInfoSsService;
+import kopo.poly.service.IUserInfoService;
 import kopo.poly.util.CmmUtil;
 import kopo.poly.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class UserRegController {
 
-    private final IUserInfoSsService userInfoSsService;
+    private final IUserInfoService userInfoSsService;
 
     // Spring Security에서 제공하는 비밀번호 암호화 객체(해시 함수)
     private final PasswordEncoder bCryptPasswordEncoder;

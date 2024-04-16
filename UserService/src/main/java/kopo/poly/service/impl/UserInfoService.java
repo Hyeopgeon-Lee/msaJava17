@@ -5,10 +5,9 @@ import kopo.poly.auth.AuthInfo;
 import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.repository.UserInfoRepository;
 import kopo.poly.repository.entity.UserInfoEntity;
-import kopo.poly.service.IUserInfoSsService;
+import kopo.poly.service.IUserInfoService;
 import kopo.poly.util.CmmUtil;
 import kopo.poly.util.DateUtil;
-import kopo.poly.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,7 +19,7 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class UserInfoSsService implements IUserInfoSsService {
+public class UserInfoService implements IUserInfoService {
 
     // RequiredArgsConstructor 어노테이션으로 생성자를 자동 생성함
     // userInfoRepository 변수에 이미 메모리에 올라간 UserInfoRepository 객체를 넣어줌
@@ -138,18 +137,20 @@ public class UserInfoSsService implements IUserInfoSsService {
         // 값이 존재한다면..
         if (rEntity.isPresent()) {
 
-            // Entity -> DTO로 변경
-            // DB 저장된 암호화된 Email 값을 복호화해서 DTO에 저장하기 위해 ObjectMapper 사용 안함
-            rDTO = UserInfoDTO.builder()
-                    .userId(CmmUtil.nvl(rEntity.get().getUserId()))
-                    .userName(CmmUtil.nvl(rEntity.get().getUserName()))
+            rDTO = UserInfoDTO.from(rEntity.get());
 
-                    // 이메일 주소를 복호화해서 Record 저장하기
-                    .email(EncryptUtil.decAES128CBC(CmmUtil.nvl(rEntity.get().getEmail())))
-                    .addr1(CmmUtil.nvl(rEntity.get().getAddr1()))
-                    .addr2(CmmUtil.nvl(rEntity.get().getAddr2()))
-                    .roles(rEntity.get().getRoles())
-                    .build();
+//            // Entity -> DTO로 변경
+//            // DB 저장된 암호화된 Email 값을 복호화해서 DTO에 저장하기 위해 ObjectMapper 사용 안함
+//            rDTO = UserInfoDTO.builder()
+//                    .userId(CmmUtil.nvl(rEntity.get().getUserId()))
+//                    .userName(CmmUtil.nvl(rEntity.get().getUserName()))
+//
+//                    // 이메일 주소를 복호화해서 Record 저장하기
+//                    .email(EncryptUtil.decAES128CBC(CmmUtil.nvl(rEntity.get().getEmail())))
+//                    .addr1(CmmUtil.nvl(rEntity.get().getAddr1()))
+//                    .addr2(CmmUtil.nvl(rEntity.get().getAddr2()))
+//                    .roles(rEntity.get().getRoles())
+//                    .build();
 
         }
 

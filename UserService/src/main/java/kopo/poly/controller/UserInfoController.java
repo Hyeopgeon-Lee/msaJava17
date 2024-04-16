@@ -10,7 +10,7 @@ import kopo.poly.controller.response.CommonResponse;
 import kopo.poly.dto.MsgDTO;
 import kopo.poly.dto.TokenDTO;
 import kopo.poly.dto.UserInfoDTO;
-import kopo.poly.service.IUserInfoSsService;
+import kopo.poly.service.IUserInfoService;
 import kopo.poly.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +36,7 @@ public class UserInfoController {
     private final JwtTokenProvider jwtTokenProvider;
 
     // 회원 서비스
-    private final IUserInfoSsService userInfoService;
+    private final IUserInfoService userInfoService;
 
     /**
      * JWT Access Token으로부터 user_id 가져오기

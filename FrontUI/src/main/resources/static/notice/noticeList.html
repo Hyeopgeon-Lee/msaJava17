@@ -18,7 +18,7 @@
 
             // Ajax 호출해서 멜론차트 조회하기
             $.ajax({
-                url: "http://" + apiServer + "/notice/vi/noticeList",
+                url: "http://" + apiServer + "/notice/v1/noticeList",
                 type: "post", // 전송방식은 Post
                 xhrFields: {
                     withCredentials: true
@@ -46,7 +46,7 @@
                             "<div class=\"divTableCell\" onclick='doDetail(" + data.noticeSeq + ")'>"
                             + data.title + "</div>");
                         $("#noticeList").append("<div class=\"divTableCell\">" + data.readCnt + "</div>");
-                        $("#noticeList").append("<div class=\"divTableCell\">" + data.userId + "</div>");
+                        $("#noticeList").append("<div class=\"divTableCell\">" + data.userName + "</div>");
                         $("#noticeList").append("<div class=\"divTableCell\">" + data.regDt + "</div>");
                         $("#noticeList").append("</div>");
                     }
@@ -54,7 +54,7 @@
                 },
                 function () {
                     alert("접근 권한이 없습니다.");
-                    location.href = loginPage;
+                    // location.href = loginPage;
                 }
             );
 
