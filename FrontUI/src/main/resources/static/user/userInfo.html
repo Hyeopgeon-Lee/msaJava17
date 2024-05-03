@@ -17,21 +17,8 @@
 
             // 로그아웃
             $("#btnLogout").on("click", function () { // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
-                // Ajax 호출해서 멜론차트 조회하기
-                $.ajax({
-                    url: "http://" + apiServer + "/user/v1/logout",
-                    type: "post", // 전송방식은 Post
-                    xhrFields: { // CORS 문제를 해결하기 위해 인증 Credentials 정보를 전달(서버쪽도 반드시 설정되어야 함)
-                        withCredentials: true
-                    },
-                    dataType: "JSON", // 전송 결과는 JSON으로 받기
-                }).then(
-                    function () { // 성공
-                        alert("로그아웃 되었습니다.");
-                        location.href = loginPage;
+                document.location.href = "http://" + apiServer + "/user/v1/logout";
 
-                    }
-                );
             })
 
             // 회원정보 상세 조회하기
