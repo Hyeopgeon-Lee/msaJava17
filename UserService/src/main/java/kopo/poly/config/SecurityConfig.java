@@ -63,7 +63,7 @@ public class SecurityConfig {
                 .logout(logout -> logout // 로그 아웃 처리
                         .logoutUrl("/user/v1/logout")
                         .deleteCookies(accessTokenName, refreshTokenName)
-                        .logoutSuccessUrl("/user/v1/logoutSuccess")
+                        .logoutSuccessUrl("http://localhost:14000/ss/login.html")
                 )
                 // 세션 사용하지 않도록 설정함
                 .sessionManagement(ss -> ss.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
