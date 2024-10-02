@@ -1,0 +1,46 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      enabled: true
+      show-details: always
+    beans:
+      enabled: true
+    info:
+      enabled: true
+    shutdown:
+      enabled: true
+  server:
+    address: localhost
+    port: 13001
+eureka:
+  client:
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    fetch-registry: true
+spring:
+  application:
+    name: API-GATEWAY
+  boot:
+    admin:
+      client: # Spring Boot Actuator Admin UI Server
+        url: http://localhost:15000
+jwt:
+  token:
+    access:
+      valid:
+        time: '300'
+      name: jwtAccessToken
+    refresh:
+      valid:
+        time: '3000'
+      name: jwtRefreshToken
+    creator: poly
+  secret:
+    key: '12345678123456781234567812345678123456781234'
+server:
+  port: '13000'

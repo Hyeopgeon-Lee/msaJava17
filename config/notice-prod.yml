@@ -1,0 +1,57 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      enabled: true
+      show-details: always
+    beans:
+      enabled: true
+    info:
+      enabled: true
+    shutdown:
+      enabled: true
+  server:
+    port: ${NOTICE-SERVICE-ACTUATOR}
+spring:
+  jpa:
+    generate-ddl: 'false'
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100 #Fetch Join
+        format_sql: 'true'
+        use_sql_comments: 'true'
+    show-sql: 'true'
+    open-in-view: 'false'
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    password: ${MARIADB-PASSWORD}
+    username: ${MARIADB-USER}
+    url: jdbc:mariadb://${MARIADB-IP}:${MARIADB-PORT}/myDB
+  application:
+    name: NOTICE-SERVICE
+  boot:
+    admin:
+      client: # Spring Boot Actuator Admin UI Server
+        url: http://${ADMIN-MANAGER-IP}:${ADMIN-MANAGER-PORT}
+jwt:
+  token:
+    access:
+      name: 'jwtAccessToken'
+eureka:
+  client:
+    fetch-registry: 'true'
+    register-with-eureka: 'true'
+    service-url:
+      defaultZone: http://${EUREKA-SERVICE-IP}:${EUREKA-SERVICE-PORT}/eureka
+server:
+  port: ${NOTICE-SERVICE-PORT}
+api:
+  gateway: ${API-GATEWAY-IP}:${API-GATEWAY-PORT}
+

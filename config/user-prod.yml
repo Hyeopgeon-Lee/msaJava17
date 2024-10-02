@@ -1,0 +1,72 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      enabled: true
+      show-details: always
+    beans:
+      enabled: true
+    info:
+      enabled: true
+    shutdown:
+      enabled: true
+  server:
+    port: ${USER-SERVICE-ACTUATOR}
+spring:
+  jpa:
+    generate-ddl: 'false'
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100 #Fetch Join
+        format_sql: 'true'
+        use_sql_comments: 'true'
+    show-sql: 'true'
+    open-in-view: 'false'
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    password: ${MARIADB-PASSWORD}
+    username: ${MARIADB-USER}
+    url: jdbc:mariadb://${MARIADB-IP}:${MARIADB-PORT}/myDB
+  application:
+    name: USER-SERVICE
+  boot:
+    admin:
+      client: # Spring Boot Actuator Admin UI Server
+        url: http://${ADMIN-MANAGER-IP}:${ADMIN-MANAGER-PORT}
+jwt:
+  token:
+    creator: poly
+    refresh:
+      valid:
+        time: '3000'
+      name: jwtRefreshToken
+    access:
+      valid:
+        time: '300'
+      name: jwtAccessToken
+  secret:
+    key: '12345678123456781234567812345678123456781234'
+eureka:
+  instance:
+    prefer-ip-address: false
+    hostname: ${USER-SERVICE-HOSTNAME}  # Kubernetes 서비스 이름으로 Eureka에 등록
+    non-secure-port: ${USER-SERVICE-PORT}  # 서비스가 실행되는 포트
+    health-check-url-path: /actuator/health  # health 엔드포인트
+    health-check-url: http://${USER-SERVICE-HOSTNAME}:${USER-SERVICE-ACTUATOR}/actuator/health  # Actuator의 health 엔드포인트
+    management-port: ${USER-SERVICE-ACTUATOR}  # Actuator가 실행되는 포트
+  client:
+    fetch-registry: 'true'
+    register-with-eureka: 'true'
+    service-url:
+      defaultZone: http://${EUREKA-SERVICE-IP}:${EUREKA-SERVICE-PORT}/eureka
+server:
+  port: ${USER-SERVICE-PORT}
+api:
+  gateway: ${API-GATEWAY-IP}:${API-GATEWAY-PORT}
