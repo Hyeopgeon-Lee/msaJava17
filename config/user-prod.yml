@@ -14,7 +14,7 @@ management:
     shutdown:
       enabled: true
   server:
-    port: ${USER-SERVICE-PORT}  # Actuator가 애플리케이션과 동일한 포트에서 실행됨
+    port: ${USER_SERVICE_PORT}  # Actuator가 애플리케이션과 동일한 포트에서 실행됨
 spring:
   jpa:
     generate-ddl: 'false'
@@ -31,15 +31,15 @@ spring:
     open-in-view: 'false'
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    password: ${MARIADB-PASSWORD}
-    username: ${MARIADB-USER}
-    url: jdbc:mariadb://${MARIADB-IP}:${MARIADB-PORT}/myDB
+    password: ${MARIADB_PASSWORD}
+    username: ${MARIADB_USER}
+    url: jdbc:mariadb://${MARIADB_IP}:${MARIADB_PORT}/myDB
   application:
     name: USER-SERVICE
   boot:
     admin:
       client: # Spring Boot Actuator Admin UI Server
-        url: http://${ADMIN-MANAGER-IP}:${ADMIN-MANAGER-PORT}
+        url: http://${ADMIN_MANAGER_IP}:${ADMIN_MANAGER_PORT}
 jwt:
   token:
     creator: poly
@@ -54,6 +54,6 @@ jwt:
   secret:
     key: '12345678123456781234567812345678123456781234'
 server:
-  port: ${USER-SERVICE-PORT}  # 애플리케이션 포트 설정
+  port: ${USER_SERVICE_PORT}  # 애플리케이션 포트 설정
 api:
-  gateway: ${API-GATEWAY-IP}:${API-GATEWAY-PORT}
+  gateway: ${API_GATEWAY_IP}:${API_GATEWAY_PORT}
