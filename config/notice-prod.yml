@@ -14,7 +14,7 @@ management:
     shutdown:
       enabled: true
   server:
-    port: ${NOTICE-SERVICE-ACTUATOR}
+    port: ${NOTICE-SERVICE-PORT}
 spring:
   jpa:
     generate-ddl: 'false'
@@ -36,20 +36,10 @@ spring:
     url: jdbc:mariadb://${MARIADB-IP}:${MARIADB-PORT}/myDB
   application:
     name: NOTICE-SERVICE
-  boot:
-    admin:
-      client: # Spring Boot Actuator Admin UI Server
-        url: http://${ADMIN-MANAGER-IP}:${ADMIN-MANAGER-PORT}
 jwt:
   token:
     access:
       name: 'jwtAccessToken'
-eureka:
-  client:
-    fetch-registry: 'true'
-    register-with-eureka: 'true'
-    service-url:
-      defaultZone: http://${EUREKA-SERVICE-IP}:${EUREKA-SERVICE-PORT}/eureka
 server:
   port: ${NOTICE-SERVICE-PORT}
 api:
