@@ -21,8 +21,7 @@
                 location.href = "/notice/noticeList.html";
             })
 
-            // Ajax 호출해서 멜론차트 조회하기
-            $.ajax({
+            $.ajax({ // 로그인한 회원 정보 가져오기
                 url: "http://" + apiServer + "/user/v1/userInfo",
                 type: "post", // 전송방식은 Post
                 xhrFields: { // CORS 문제를 해결하기 위해 인증 Credentials 정보를 전달(서버쪽도 반드시 설정되어야 함)
