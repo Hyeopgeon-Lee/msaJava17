@@ -13,8 +13,6 @@ management:
       enabled: true
     shutdown:
       enabled: true
-  server:
-    port: ${USER_SERVICE_PORT}
 spring:
   jpa:
     generate-ddl: 'false'
