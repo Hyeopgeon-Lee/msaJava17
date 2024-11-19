@@ -85,7 +85,7 @@
 
             // Ajax 호출해서 회원가입하기
             $.ajax({
-                    url: "http://" + apiServer + "/reg/insertUserInfo",
+                    url: "http://" + apiServer + "/reg/v1/insertUserInfo",
                     type: "post", // 전송방식은 Post
                     dataType: "JSON", // 전송 결과는 JSON으로 받기
                     data: $("#f").serialize(), // form 태그 내 input 등 객체를 자동으로 전송할 형태로 변경하기

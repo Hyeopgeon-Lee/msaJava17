@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notice-service-dep
+  namespace: poly
+  labels:
+    app: notice-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notice-service
+      tier: backend
+  template:
+    metadata:
+      name: notice-service
+      labels:
+        app: notice-service
+        tier: backend
+    spec:
+      containers:
+        - name: notice-service
+          image: docker.io/hyeopgeonlee/msa-notice
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "50m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          env:
+            # notice-service 관련 환경 변수들
+            - name: NOTICE_SERVICE_IP
+              valueFrom:
+                configMapKeyRef:
+                  name: msa-config
+                  key: notice-service-ip
+            - name: NOTICE_SERVICE_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: msa-config
+                  key: notice-service-port
+            - name: MARIADB-IP
+              valueFrom:
+                configMapKeyRef:
+                  name: msa-config
+                  key: mariadb-ip
+            - name: MARIADB-PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: msa-config
+                  key: mariadb-port
+            - name: MARIADB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: poly-secret
+                  key: username
+            - name: MARIADB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: poly-secret
+                  key: password
+            - name: API-GATEWAY-IP
+              valueFrom:
+                configMapKeyRef:
+                  name: msa-config
+                  key: api-gateway-ip
+            - name: API-GATEWAY-PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: msa-config
+                  key: api-gateway-port
+            - name: CONFIG_SERVICE_IP
+              valueFrom:
+                configMapKeyRef:
+                  name: msa-config
+                  key: config-service-ip
+            - name: CONFIG_SERVICE_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: msa-config
+                  key: config-service-port
+          ports:
+            - containerPort: 12000  # 기본 서비스 포트
+      restartPolicy: Always

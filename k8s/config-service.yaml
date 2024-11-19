@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: config-service-svc
+  namespace: poly
+  labels:
+    app: config-service
+spec:
+  selector:
+    app: config-service
+    tier: backend
+  ports:
+    - protocol: TCP
+      port: 14000  # 서비스의 포트
+      targetPort: 14000  # 컨테이너에서 사용되는 포트
+  type: ClusterIP
+  clusterIP: 10.96.1.50  # 고정된 ClusterIP를 설정 (클러스터 내부에서만 유효)

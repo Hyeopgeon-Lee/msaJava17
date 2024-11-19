@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: poly-config
+  namespace: poly
+data:
+  mariadb-ip: "10.96.124.112" # DB IP
+  mariadb-port: "3306" # DB 포트
+  api-gateway-ip: "10.96.1.20" # API게이트웨이 IP
+  api-gateway-port: "13000" # API게이트웨이 포트
+  notice-service-ip: "10.96.1.30"
+  notice-service-port: "12000"
+  user-service-hostname: "user-service-svc"
+  user-service-ip: "10.96.1.40"
+  user-service-port: "11000"
+  config-service-ip: "10.96.1.50"
+  config-service-port: "14000"
+  config-service-url: "https://github.com/Hyeopgeon-Lee/msaJava17"
+  config-service-dir: "config"
+  spring-profile-active: "prod"
+
+

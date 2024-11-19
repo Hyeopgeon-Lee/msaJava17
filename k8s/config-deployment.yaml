@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: config-service-dep
+  namespace: poly
+  labels:
+    app: config-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: config-service
+      tier: backend
+  template:
+    metadata:
+      name: config-service
+      labels:
+        app: config-service
+        tier: backend
+    spec:
+      dnsPolicy: "None"  # 기본 클러스터 DNS를 사용하지 않도록 설정
+      dnsConfig:
+        nameservers:
+          - 8.8.8.8  # Google DNS 서버
+          - 8.8.4.4  # Google DNS 서버
+        searches:
+          - poly.svc.cluster.local  # 기본 쿠버네티스 검색 도메인
+          - svc.cluster.local
+          - cluster.local
+        options:
+          - name: ndots
+            value: "5"
+      containers:
+        - name: config-service
+          image: docker.io/hyeopgeonlee/msa-config
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "50m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          env:
+            - name: CONFIG_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: msa-config
+                  key: config-service-url
+            - name: CONFIG_SERVICE_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: msa-config
+                  key: config-service-port
+            - name: CONFIG_SERVICE_DIR
+              valueFrom:
+                configMapKeyRef:
+                  name: msa-config
+                  key: config-service-dir
+          ports:
+            - containerPort: 14000  # 애플리케이션의 기본 포트
+      restartPolicy: Always

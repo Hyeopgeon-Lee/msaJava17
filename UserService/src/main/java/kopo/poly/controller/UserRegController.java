@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
         allowCredentials = "true")
 @Tag(name = "회원가입을 위한 API", description = "회원가입을 위한 API 설명입니다.")
 @Slf4j
-@RequestMapping(value = "/reg")
+@RequestMapping(value = "/reg/v1")
 @RequiredArgsConstructor
 @RestController
 public class UserRegController {

@@ -1,0 +1,12 @@
+server:
+  port: ${CONFIG_SERVICE_PORT}
+spring:
+  application:
+    name: config
+  cloud:
+    config:
+      server:
+        git:
+          uri: ${CONFIG_SERVICE_URL}
+          default-label: master
+          search-paths: ${CONFIG_SERVICE_DIR}

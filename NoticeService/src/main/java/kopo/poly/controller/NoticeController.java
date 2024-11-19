@@ -25,9 +25,8 @@ import java.util.Optional;
 
 @CrossOrigin(origins = {"http://localhost:13000", "http://localhost:14000"},
         allowCredentials = "true",
-        allowedHeaders = {"Content-Type"},
-        methods = {RequestMethod.POST, RequestMethod.GET},
-        originPatterns = {"notice/**"}
+        allowedHeaders = {"Content-Type", "Authorization"},
+        methods = {RequestMethod.POST, RequestMethod.GET}
 )
 @Tag(name = "공지사항 서비스", description = "공지사항 구현을 위한 API")
 @Slf4j

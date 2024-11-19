@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: notice-service-svc
+  namespace: poly
+  labels:
+    app: notice-service
+spec:
+  selector:
+    app: notice-service
+    tier: backend
+  ports:
+    - protocol: TCP
+      port: 12000  # 서비스의 포트
+      targetPort: 12000  # 컨테이너에서 사용되는 포트
+  type: ClusterIP
+  clusterIP: 10.96.1.30  # 고정된 ClusterIP를 설정 (클러스터 내부에서만 유효)

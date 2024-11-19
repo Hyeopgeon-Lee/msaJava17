@@ -1,0 +1,7 @@
+spring:
+  config:
+    import: "optional:configserver:http://${CONFIG_SERVICE_IP}:${CONFIG_SERVICE_PORT}/"
+  cloud:
+    config:
+      name: gateway
+      profile: prod
