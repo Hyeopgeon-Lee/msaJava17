@@ -21,8 +21,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 
-@CrossOrigin(origins = {"http://localhost:12000",
-        "http://localhost:13000", "http://localhost:14000"},
+@CrossOrigin(origins = {"http://10.96.1.60:14000", "http://10.96.1.20:12000" +
+        "http://10.96.1.30:12000", "http://localhost:33333"},
         allowedHeaders = {"POST, GET", "FEIGN"},
         allowCredentials = "true")
 @Tag(name = "로그인된 사용자들이 접근하는 API", description = "로그인된 사용자들이 접근하는 API 설명입니다.")

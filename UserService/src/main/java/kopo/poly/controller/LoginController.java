@@ -23,7 +23,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 
-@CrossOrigin(origins = {"http://localhost:13000", "http://localhost:14000"},
+@CrossOrigin(origins = {"http://10.96.1.60:14000", "http://10.96.1.20:12000" +
+        "http://localhost:33333"},
         allowCredentials = "true",
         allowedHeaders = {"Content-Type"},
         methods = {RequestMethod.POST, RequestMethod.GET},

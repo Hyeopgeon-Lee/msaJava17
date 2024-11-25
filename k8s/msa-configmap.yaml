@@ -17,3 +17,5 @@ data:
   config-service-url: "https://github.com/Hyeopgeon-Lee/msaJava17"
   config-service-dir: "config"
   spring-profile-active: "prod"
+
+

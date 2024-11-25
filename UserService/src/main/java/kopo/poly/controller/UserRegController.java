@@ -22,7 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
-@CrossOrigin(origins = {"http://localhost:13000", "http://localhost:14000"},
+@CrossOrigin(origins = {"http://10.96.1.60:14000", "http://10.96.1.20:12000" +
+        "http://localhost:33333"},
         allowedHeaders = {"POST, GET"},
         allowCredentials = "true")
 @Tag(name = "회원가입을 위한 API", description = "회원가입을 위한 API 설명입니다.")
