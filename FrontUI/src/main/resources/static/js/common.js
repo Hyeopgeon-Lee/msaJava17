@@ -1,5 +1,5 @@
 // API 서버 정보 기입
-const apiServer = "localhost:13000";
+const apiServer = "10.96.1.20:12000";
 const loginPage = "/ss/login.html";
 const jwtTokenName = "jwtAccessToken";
 
