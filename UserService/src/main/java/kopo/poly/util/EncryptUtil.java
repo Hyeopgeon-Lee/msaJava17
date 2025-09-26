@@ -1,120 +1,111 @@
 package kopo.poly.util;
 
-import org.apache.tomcat.util.codec.binary.Base64;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
+import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.UnsupportedEncodingException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.AlgorithmParameterSpec;
+import java.nio.charset.StandardCharsets;
+import java.security.*;
+import java.util.Base64;
 
+/**
+ * 암호화 유틸리티 클래스
+ * - SHA-256 해시 암호화
+ * - AES-128 CBC 대칭키 암호화/복호화
+ */
 public class EncryptUtil {
 
-    /*
-     * 암호화 알고리즘에 추가시킬 암호화 문구
-     *
-     *
-     * 일반적인 암호화 알고리즘  SHA-256을 통해서만 암호화 시킬 경우, 암호화 된 값만 보고 일반적인 비밀번호에 대한 값을 쉽게
-     * 예측이 가능함 따라서, 암호화할 때 암호화되는 값에 추가적인 문자열을 붙여서 함께 암호화를 진행함
+    /**
+     * SHA-256 해시 암호화 시 사용할 추가 문자열 (Salt 개념)
+     * - 동일한 입력값이라도 암호화 결과를 다르게 하기 위함
      */
-    final static String addMessage = "PolyDataAnalysis"; // 임의 값
-
-
-    /*
-     * AES128-CBC 암호화 알고리즘에 사용되는 초기 백터와 암호화 키
-     */
-
-    //초기 백터(16바이트 크기를 가지며, 16바이트 단위로 암호화시, 암호화할 총 길이가 16바이트가 되지 못하면 뒤에 추가하는 바이트)
-    final static byte[] ivBytes = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00,	0x00, 0x00, 0x00, 0x00 };
-
-    //AES128-CBC 암호화 알고리즘에 사용되는 키 (16자리 문자만 가능함)
-    final static String key = "PolyTechnic12345"; //16글자(영문자 1글자당 1바이트임)
-
+    private static final String addMessage = "PolyDataAnalysis";
 
     /**
-     * 해시 알고리즘(단방향 암호화 알고리즘)-SHA-256
-     *
-     * @param str 암호화 시킬 값
-     * @return 암호화된 값
+     * AES CBC 모드에서 사용할 초기 벡터(IV) - 16바이트
+     * - 암호화 초기화 값으로 동일해야 복호화 가능
      */
-    public static String encHashSHA256(String str) throws Exception {
+    private static final byte[] ivBytes = new byte[16];
 
-        String res = ""; // 암호화 결과괎이 저장되는 변수
-        String plantText = addMessage + str; // 암호화 시킬 값에 보안강화를 위해 임의 값을 추가함
+    /**
+     * AES-128 CBC 암호화 시 사용할 키 (16바이트 = 128비트)
+     * - 16자 이내로 지정해야 AES-128 CBC 키 조건 충족
+     */
+    private static final String key = "PolyTechnic12345";
+
+    /**
+     * SHA-256 해시 함수로 문자열 암호화 (단방향)
+     *
+     * @param str 암호화할 원문
+     * @return 암호화된 64자리 문자열 (Hex 포맷)
+     */
+    public static String encHashSHA256(String str) {
+        String result;
+        String plainText = addMessage + str;
 
         try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            digest.update(plainText.getBytes());
+            byte[] hash = digest.digest();
 
-            // 자바는 기본적으로 표준 암호화 알고리즘을 java.security 패키지를 통해 제공함
-            // 여러 해시 알고리즘 중 가장 많이 사용되는 SHA-256를 지원하고 있음
-            MessageDigest sh = MessageDigest.getInstance("SHA-256");
-
-            sh.update(plantText.getBytes());
-
-            byte byteData[] = sh.digest();
-
-            StringBuffer sb = new StringBuffer();
-
-            for (int i = 0; i < byteData.length; i++) {
-                sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
-
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hash) {
+                sb.append(String.format("%02x", b));
             }
 
-            res = sb.toString();
+            result = sb.toString();
 
-            // 자바에서 제공하지 알고리즘이 아닌 경우, 에러 발생
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-
-            res = "";
+            result = ""; // SHA-256 지원되지 않으면 빈 문자열
         }
 
-        return res;
-
+        return result;
     }
 
-
-
     /**
-     * AES128 CBC 암호화 함수
+     * AES-128 CBC 방식으로 문자열 암호화
      *
-     * 128은 암호화 키 길이를 의미함 128비트는 = 16바이트(1바이트=8비트 * 16 = 128)
+     * @param str 평문 문자열
+     * @return Base64로 인코딩된 암호문
      */
     public static String encAES128CBC(String str)
-            throws UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+            throws NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidKeyException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
 
-        byte[] textBytes = str.getBytes("UTF-8");
-        AlgorithmParameterSpec ivSpec = new IvParameterSpec(ivBytes);
-        SecretKeySpec newKey = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
-        Cipher cipher = null;
-        cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, newKey, ivSpec);
-        return Base64.encodeBase64String(cipher.doFinal(textBytes));
+        byte[] textBytes = str.getBytes(StandardCharsets.UTF_8);
+
+        SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
+        IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
+
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec);
+
+        byte[] encrypted = cipher.doFinal(textBytes);
+
+        return Base64.getEncoder().encodeToString(encrypted);
     }
 
     /**
-     * AES128 CBC 복호화 함수
+     * AES-128 CBC 방식으로 암호문 복호화
      *
-     * 128은 암호화 키 길이를 의미함 128비트는 = 16바이트(1바이트=8비트 * 16 = 128)
+     * @param str Base64로 인코딩된 암호문
+     * @return 복호화된 평문 문자열
      */
     public static String decAES128CBC(String str)
-            throws UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+            throws NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidKeyException, InvalidAlgorithmParameterException,
+            IllegalBlockSizeException, BadPaddingException {
 
-        byte[] textBytes = Base64.decodeBase64(str);
-        // byte[] textBytes = str.getBytes("UTF-8");
-        AlgorithmParameterSpec ivSpec = new IvParameterSpec(ivBytes);
-        SecretKeySpec newKey = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
+        byte[] encryptedBytes = Base64.getDecoder().decode(str);
+
+        SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
+        IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
+
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.DECRYPT_MODE, newKey, ivSpec);
-        return new String(cipher.doFinal(textBytes), "UTF-8");
+        cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
+
+        byte[] decrypted = cipher.doFinal(encryptedBytes);
+
+        return new String(decrypted, StandardCharsets.UTF_8);
     }
 }

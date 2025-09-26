@@ -5,76 +5,61 @@
     <meta name="referrer" content="strict-origin-when-cross-origin"/>
     <title>로그인 화면</title>
     <link rel="stylesheet" href="/css/table.css"/>
-    <script type="text/javascript" src="/js/common.js"></script>
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" src="/js/jquery.serializeObject.min.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
     <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
 
-    <script type="text/javascript">
-
-        // HTML로딩이 완료되고, 실행됨
+    <script>
         $(document).ready(function () {
-
-            // 회원가입
-            $("#btnUserReg").on("click", function () { // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
+            $("#btnUserReg").on("click", function () {
                 location.href = "/ss/userRegForm.html";
-            })
+            });
 
-            // 메인화면
-            $("#btnMain").on("click", function () { // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
+            $("#btnMain").on("click", function () {
                 location.href = "/index.html";
-            })
+            });
 
-            // 로그인
             $("#btnLogin").on("click", function () {
-                let f = document.getElementById("f"); // form 태그
+                const f = document.getElementById("f");
 
-                if (f.user_id.value === "") {
-                    alert("아이디를 입력하세요.");
-                    f.user_id.focus();
-                    return;
-                }
+                if (!f.userId.value) { alert("아이디를 입력하세요."); f.userId.focus(); return; }
+                if (!f.password.value) { alert("비밀번호를 입력하세요."); f.password.focus(); return; }
 
-                if (f.password.value === "") {
-                    alert("비밀번호를 입력하세요.");
-                    f.password.focus();
-                    return;
-                }
-
-                // Ajax 호출해서 로그인하기
                 $.ajax({
-                    url: "http://" + apiServer + "/login/v1/loginProc",
-                    type: "post", // 전송방식은 Post
-                    // contentType: "application/json",
-                    xhrFields: {
-                        withCredentials: true
-                    },
-                    dataType: "JSON", // 전송 결과는 JSON으로 받기
-                    data: $("#f").serialize(), // form 태그 내 input 등 객체를 자동으로 전송할 형태로 변경하기
-                }).then(
-                    function (json) { // 성공
-
-                        if (json.data.result === 1) { // 로그인 성공
-                            alert(json.data.msg); // 메시지 띄우기
-                            location.href = "/user/loginResult.html"; // 로그인 성공 페이지 이동
-
-                        } else { // 로그인 실패
-                            alert(json.data.msg); // 메시지 띄우기
-                            $("#user_id").focus(); // 아이디 입력 항목에 마우스 커서 이동
+                    url: apiUrl("/login/v1/loginProc"),
+                    method: "POST",
+                    contentType: "application/json; charset=UTF-8",
+                    dataType: "json",
+                    xhrFields: { withCredentials: true },
+                    data: JSON.stringify({ userId: f.userId.value, password: f.password.value })
+                })
+                    .done(function (res) {
+                        // 로그인 성공(200 OK, result=1)
+                        if (res && res.data && res.data.result === 1) {
+                            alert(res.data.msg || "로그인 성공");
+                            location.href = "/user/loginResult.html";
+                        } else {
+                            // 혹시 컨트롤러에서 200 + result=0 으로 내려오는 경우도 대비
+                            alert((res && res.data && res.data.msg) || "로그인에 실패했습니다.");
+                            f.userId.focus();
                         }
-
-                    },
-                    function () {
-                        alert("에러가 발생하였습니다. \n다음에 다시 시도하길 바랍니다."); // 메시지 띄우기
-                        $("#user_id").focus(); // 아이디 입력 항목에 마우스 커서 이동
-
-                    }
-                );
-
-            })
-        })
+                    })
+                    .fail(function (jqXHR) {
+                        // 401 등 오류일 때 서버가 준 메시지 보여주기
+                        const r = jqXHR.responseJSON;
+                        const msg =
+                            (r && r.data && r.data.msg) ||
+                            r?.message ||
+                            "에러가 발생하였습니다. \n다음에 다시 시도하길 바랍니다.";
+                        alert(msg);
+                        f.userId.focus();
+                    });
+            });
+        });
     </script>
+
 </head>
 <body>
 <h2>로그인하기</h2>
@@ -87,7 +72,7 @@
                 <div class="divTableCell">아이디
                 </div>
                 <div class="divTableCell">
-                    <input type="text" name="user_id" id="user_id" style="width:95%"/>
+                    <input type="text" name="userId" id="userId" style="width:95%"/>
                 </div>
             </div>
             <div class="divTableRow">

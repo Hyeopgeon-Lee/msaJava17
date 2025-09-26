@@ -1,8 +1,92 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      enabled: true
+      show-details: always
+    beans:
+      enabled: true
+    info:
+      enabled: true
+    shutdown:
+      enabled: true
 
 spring:
-  config:
-    import: "optional:configserver:http://localhost:8888/"
+  application:
+    name: API-GATEWAY
+  # application.yml (ApiGateway)
   cloud:
-    config:
-      name: gateway
-      profile: prod
+    gateway:
+      # (A) 모든 라우트 공통 필터
+      default-filters:
+        # 혹시 남아도는 중복을 1개로 정리(게이트웨이가 붙인 첫 값 유지)
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin Access-Control-Expose-Headers, RETAIN_FIRST
+
+      # (B) 전역 CORS (게이트웨이 전담)
+      globalcors:
+        add-to-simple-url-handler-mapping: false
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:14000"
+              - "http://127.0.0.1:14000"
+            allowedMethods: [ "GET","POST","PUT","PATCH","DELETE","OPTIONS" ]
+            allowedHeaders: [ "*" ]
+            exposedHeaders: [ "Location","Content-Disposition","Authorization" ]
+            allowCredentials: true
+            maxAge: 3600
+
+
+jwt:
+  token:
+    access:
+      valid:
+        time: '300'
+      name: jwtAccessToken
+    refresh:
+      valid:
+        time: '3000'
+      name: jwtRefreshToken
+  creator: poly
+  secret:
+    key: '12345678123456781234567812345678123456781234'
+
+server:
+  port: '9000'
+
+api:
+  server:
+    user:
+      protocol: http
+      host: localhost
+      port: 9001
+      refresh-endpoint: /login/v1/refresh
+    notice:
+      protocol: http
+      host: localhost
+      port: 9002
+
+security:
+  public-paths:
+    - /login/**
+    - /reg/**
+    - /notice/v1/noticeList
+    - /notice/v1/noticeInfo
+    - /v3/api-docs/**
+    - /swagger-ui/**
+    - /swagger-ui.html
+    - /actuator/**
+
+
+logging:
+  level:
+    org.springframework.security.oauth2.server.resource: DEBUG
+    org.springframework.cloud.gateway: INFO      # 필요 시 DEBUG로
+
+app:
+  cors:
+    # 💡 여러 오리진이 필요하면 콤마로 추가: http://localhost:14000,http://127.0.0.1:14000
+    allowed-origins: http://localhost:14000

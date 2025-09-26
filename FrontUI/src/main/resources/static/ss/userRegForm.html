@@ -5,8 +5,9 @@
     <title>회원가입 화면</title>
     <link rel="stylesheet" href="/css/table.css"/>
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-    <script type="text/javascript" src="/js/common.js"></script>
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.serializeObject.min.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
     <script type="text/javascript">
 
         // HTML로딩이 완료되고, 실행됨
@@ -35,15 +36,15 @@
         //회원가입 정보의 유효성 체크하기
         function doSubmit(f) {
 
-            if (f.user_id.value === "") {
+            if (f.userId.value === "") {
                 alert("아이디를 입력하세요.");
-                f.user_id.focus();
+                f.userId.focus();
                 return;
             }
 
-            if (f.user_name.value === "") {
+            if (f.userName.value === "") {
                 alert("이름을 입력하세요.");
-                f.user_name.focus();
+                f.userName.focus();
                 return;
             }
 
@@ -83,28 +84,29 @@
                 return;
             }
 
-            // Ajax 호출해서 회원가입하기
             $.ajax({
-                    url: "http://" + apiServer + "/reg/v1/insertUserInfo",
-                    type: "post", // 전송방식은 Post
-                    dataType: "JSON", // 전송 결과는 JSON으로 받기
-                    data: $("#f").serialize(), // form 태그 내 input 등 객체를 자동으로 전송할 형태로 변경하기
-                    xhrFields: {
-                        withCredentials: true
-                    },
-                    success: function (json) { // /notice/noticeUpdate 호출이 성공했다면..
+                url: apiUrl("/reg/v1/insertUserInfo"),
+                type: "POST",
+                contentType: "application/json; charset=UTF-8",
+                dataType: "json", // ★ 소문자 json
+                data: JSON.stringify($("#f").serializeObject()),
+                xhrFields: {withCredentials: true}
+            })
+                .done(function (json) {
+                    // ★ 서버 표준 포맷 {status, message, data:{result,msg}}
+                    const ok = json?.status === 200 && json?.data?.result === 1;
+                    const msg = json?.data?.msg || json?.message || "처리되었습니다.";
 
-                        if (json.result === 1) { // 회원가입 성공
-                            alert(json.msg); // 메시지 띄우기
-                            location.href = "/ss/login.html"; // 로그인 페이지 이동
-
-                        } else { // 회원가입 실패
-                            alert(json.msg); // 메시지 띄우기
-                        }
-
-                    }
-                }
-            )
+                    alert(msg);
+                    if (ok) location.href = "/ss/login.html";
+                })
+                .fail(function (jqXHR) {
+                    // 에러도 서버 표준 포맷이면 여기서 메시지 추출
+                    let r = jqXHR.responseJSON;
+                    let msg = (r && (r.data && r.data.msg)) || (r && r.message) || "요청 실패";
+                    alert(msg);
+                    console.error("REG FAIL:", jqXHR.status, jqXHR.responseText);
+                });
         }
 
         function kakaoPost(f) {
@@ -136,14 +138,14 @@
                 <div class="divTableCell">* 아이디
                 </div>
                 <div class="divTableCell">
-                    <input type="text" name="user_id" style="width:95%"/>
+                    <input type="text" name="userId" style="width:95%"/>
                 </div>
             </div>
             <div class="divTableRow">
                 <div class="divTableCell">* 이름
                 </div>
                 <div class="divTableCell">
-                    <input type="text" name="user_name" style="width:95%"/>
+                    <input type="text" name="userName" style="width:95%"/>
                 </div>
             </div>
             <div class="divTableRow">

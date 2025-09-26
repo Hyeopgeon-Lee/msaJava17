@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <title>회원정보 보기</title>
     <link rel="stylesheet" href="/css/table.css"/>
-    <script type="text/javascript" src="/js/common.js"></script>
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
     <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
     <script type="text/javascript">
@@ -23,13 +23,11 @@
 
             // 회원정보 상세 조회하기
             $.ajax({
-                url: "http://" + apiServer + "/user/v1/userInfo",
-                type: "post", // 전송방식은 Post
-                xhrFields: { // CORS 문제를 해결하기 위해 인증 Credentials 정보를 전달(서버쪽도 반드시 설정되어야 함)
-                    withCredentials: true
-                },
-                dataType: "JSON", // 전송 결과는 JSON으로 받기
-
+                url: apiUrl("/user/v1/userInfo"),
+                type: "POST",
+                contentType: "application/json; charset=UTF-8",
+                dataType: "json", // ★ 소문자 json
+                xhrFields: {withCredentials: true}
             }).then(
                 function (json) { // 성공
 
@@ -43,7 +41,7 @@
 
                 }, function () { // 실패
                     alert("접근 권한이 없습니다.");
-                    location.href = loginPage;
+                    // location.href = loginPage;
                 }
             );
         })

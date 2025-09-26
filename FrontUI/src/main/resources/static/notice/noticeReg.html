@@ -4,78 +4,74 @@
     <meta charset="UTF-8">
     <title>게시판 글쓰기</title>
     <link rel="stylesheet" href="/css/table.css"/>
-    <script type="text/javascript" src="/js/common.js"></script>
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" src="/js/jquery.serializeObject.min.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
     <script type="text/javascript">
 
-        // HTML로딩이 완료되고, 실행됨
-        $(document).ready(function () {
-            // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
-            $("#btnSend").on("click", function () {
-                doSubmit(); // 공지사항 등록하기 실행
-            })
-        })
 
-        // 공지사항 저장하기
+        $(function () {
+            $("#btnSend").on("click", doSubmit);
+            $("#btnList").on("click", () => location.href = "/notice/noticeList.html");
+        });
+
         function doSubmit() {
+            const f = document.getElementById("f");
 
-            let f = document.getElementById("f"); // form 태그
-
-            if (f.title.value === "") {
-                alert("제목을 입력하시기 바랍니다.");
+            // 간단 검증
+            if (!f.title.value.trim()) {
+                alert("제목을 입력하세요.");
                 f.title.focus();
                 return;
             }
-            if (calBytes(f.title.value) > 200) {
-                alert("최대 200Bytes까지 입력 가능합니다.");
-                f.title.focus();
-                return;
-            }
-            let noticeCheck = false; //체크 여부 확인 변수
-            for (let i = 0; i < f.noticeYn.length; i++) {
-                if (f.noticeYn[i].checked) {
-                    noticeCheck = true;
-                    break;
-                }
-            }
-            if (noticeCheck === false) {
-                alert("공지글 여부를 선택하시기 바랍니다.");
-                f.noticeYn[0].focus();
-                return;
-            }
-
-            if (f.contents.value === "") {
-                alert("내용을 입력하시기 바랍니다.");
-                f.contents.focus();
-                return;
-            }
-            if (calBytes(f.contents.value) > 4000) {
-                alert("최대 4000Bytes까지 입력 가능합니다.");
+            if (!f.contents.value.trim()) {
+                alert("내용을 입력하세요.");
                 f.contents.focus();
                 return;
             }
 
-            $.ajax({ // Ajax 호출해서 공지사항 등록하기
-                url: "http://" + apiServer + "/notice/v1/noticeInsert",
-                type: "post", // 전송방식은 Post
-                xhrFields: {
-                    withCredentials: true
-                },
-                contentType: "application/json",
-                dataType: "JSON", // 전송 결과는 JSON으로 받기
-                data: JSON.stringify($("#f").serializeObject())// form 태그 내 input 등 객체를 자동으로 전송할 형태로 변경하기
+            const noticeYn = $('input[name="noticeYn"]:checked').val();
+            if (!noticeYn) {
+                alert("공지글 여부를 선택하세요.");
+                $('input[name="noticeYn"]').first().focus();
+                return;
+            }
 
-            }).then(
-                function (json) { // 성공
+            const payload = {
+                title: f.title.value.trim(),
+                noticeYn,
+                contents: f.contents.value
+            };
 
-                    alert(json.msg); // 메시지 띄우기
-                    location.href = "/notice/noticeList.html"; // 공지사항 리스트 이동
+            // 중복 클릭 방지
+            $("#btnSend").prop("disabled", true).text("등록 중...");
 
-                }
-            );
+            $.ajax({
+                url: apiUrl("/notice/v1/noticeInsert"),
+                method: "POST",
+                data: JSON.stringify(payload)
+            })
+                .done((res) => {
+                    // 공통 응답 포맷: { status, message, data: { result, msg } }
+                    if (res?.status === 200 && res?.data?.result === 1) {
+                        alert(res.data.msg || "등록되었습니다.");
+                        location.href = "/notice/noticeList.html";
+                        return;
+                    }
+                    // 비정상 응답이지만 200인 경우
+                    alert(res?.data?.msg || "등록에 실패했습니다. 다시 시도해 주세요.");
+                })
+                .fail((jq) => {
+                    // 401 → 게이트웨이가 자동 리프레시/재시도 하지만 실패 시 여기로 옵니다.
+                    const r = jq.responseJSON;
+                    alert(r?.data?.msg || r?.message || "에러가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+                })
+                .always(() => {
+                    $("#btnSend").prop("disabled", false).text("등록");
+                });
         }
     </script>
+
 </head>
 <body>
 <h2>공지사항 등록하기</h2>
@@ -110,6 +106,7 @@
     <div>
         <button id="btnSend" type="button">등록</button>
         <button type="reset">다시 작성</button>
+        <button id="btnList" type="button">목록</button>
     </div>
 </form>
 </body>

@@ -1,58 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title>로그인 성공</title>
+    <meta charset="UTF-8"/>
+    <title>로그인 성공!</title>
     <link rel="stylesheet" href="/css/table.css"/>
-    <script type="text/javascript" src="/js/common.js"></script>
-    <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
-    <script type="text/javascript">
-
-        // HTML로딩이 완료되고, 실행됨
-        $(document).ready(function () {
-
-            // 회원정보
-            $("#btnUserInfo").on("click", function () { // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
-                location.href = "/user/userInfo.html";
-            })
-
-            // 공지사항
-            $("#btnNotice").on("click", function () { // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
-                location.href = "/notice/noticeList.html";
-            })
-
-            $.ajax({ // 로그인한 회원 정보 가져오기
-                url: "http://" + apiServer + "/user/v1/userInfo",
-                type: "post", // 전송방식은 Post
-                xhrFields: { // CORS 문제를 해결하기 위해 인증 Credentials 정보를 전달(서버쪽도 반드시 설정되어야 함)
-                    withCredentials: true
+    <script src="/js/jquery-3.6.0.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        // 로그인 여부 확인 후, 성공이면 상세정보 호출
+        $(function () {
+            requireLogin({
+                onAuthed: function (user) {
+                    $("#loginUserId").text((user.userId || user.username) + "님이 로그인했습니다.");
+                    loadUserInfo();
                 },
-                dataType: "JSON", // 전송 결과는 JSON으로 받기
-            }).then(
-                function (json) { // 성공
-                    $("#loginUserId").append(json.data.userId + "님이 로그인하였습니다.");
+                onUnauthed: function () {
+                    // requireLogin이 redirect 처리함
+                },
+            });
 
-                }, function () { // 실패
-                    alert("접근 권한이 없습니다.");
-                    location.href = loginPage;
+            $("#btnBack").on("click", () => (location.href = "/"));
+        });
 
-                }
-            );
-        })
+        function loadUserInfo() {
+            $.ajax({
+                url: apiUrl("/user/v1/userInfo"),
+                type: "POST",
+                contentType: "application/json; charset=UTF-8",
+                dataType: "json",
+                xhrFields: {withCredentials: true},
+            }).done(function (res) {
+                const u = res && res.data ? res.data : {};
+                $("#userId").text(u.userId || "");
+                $("#userName").text(u.userName || "");
+            }).fail(function (xhr) {
+                alert(extractErrorMessageFromXhr(xhr));
+                // location.href = loginPage; // 만료/권한 오류 시 로그인 화면으로
+            });
+        }
     </script>
 </head>
 <body>
+<h2>로그인 성공!</h2>
+<div style="margin: 6px 0; color: #555">
+    <span id="loginUserId"></span>
+</div>
+<hr/>
+<br/>
+
 <div class="divTable minimalistBlack">
     <div class="divTableBody">
         <div class="divTableRow">
-            <div class="divTableCell">로그인된 사용자아이디</div>
-            <div class="divTableCell" id="loginUserId"></div>
+            <div class="divTableCell">아이디</div>
+            <div class="divTableCell" id="userId"></div>
+        </div>
+        <div class="divTableRow">
+            <div class="divTableCell">이름</div>
+            <div class="divTableCell" id="userName"></div>
         </div>
     </div>
 </div>
-<div></div>
-<br/><br/>
-<button id="btnUserInfo" type="button">회원정보</button>
-<button id="btnNotice" type="button">공지사항</button>
+
+<br/>
+<div>
+    <button id="btnBack" type="button">메인으로</button>
+</div>
 </body>
 </html>

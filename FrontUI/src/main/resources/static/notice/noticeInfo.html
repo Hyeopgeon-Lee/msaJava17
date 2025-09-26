@@ -1,119 +1,141 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <title>게시판 글보기</title>
     <link rel="stylesheet" href="/css/table.css"/>
-    <script type="text/javascript" src="/js/common.js"></script>
-    <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
-    <script type="text/javascript"
-            src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script src="/js/jquery-3.6.0.min.js"></script>
+    <script src="/js/common.js"></script>
     <script type="text/javascript">
+        "use strict";
 
-        let param = new URLSearchParams(window.location.search);
+        const param = new URLSearchParams(window.location.search);
+        const nSeq = param.get("nSeq");
 
-        let loginUserId = ""; // Controller에서 받은 로그인 아이디
-        let userId = ""; // 공지사항 게시글 작성자 아이디
-        const nSeq = param.get("nSeq"); // night; // 현재 글번호
+        // 로그인 사용자 / 게시글 작성자
+        let loginUser = null;      // { userId, ... } 또는 null
+        let authorUserId = "";     // 게시글 작성자 아이디
 
-        // 로그인 여부 체크 및 사용자 아이디 가져오기
-        // 회원아이디가 존재하지 않으면, 로그인 안된 것으로 판단
-        function loginInfo() {
+        // 버튼 토글 (로그인 사용자와 작성자가 동일할 때만 노출)
+        function toggleAuthorButtons() {
+            const currentUserId = loginUser && loginUser.userId;
+            const isAuthor = !!currentUserId && currentUserId === authorUserId;
 
-            loginCheck(); // 로그인 여부 체크하기
-
-            $.ajax({ //회원 아이디 가져오기
-                url: "http://" + apiServer + "/user/getTokenInfo",
-                type: "post", // 전송방식은 Post
-                dataType: "JSON", // 전송 결과는 JSON으로 받기
-                xhrFields: { // CORS 해결을 위해 인증 정보 포함하여 전달하도록 설정
-                    withCredentials: true
-                }
-            }).then(function (json) {
-                loginUserId = json.userId;
-
-            });
+            if (isAuthor) {
+                $("#btnEdit, #btnDelete").show();
+            } else {
+                $("#btnEdit, #btnDelete").hide();
+            }
         }
 
-        // HTML로딩이 완료되고, 실행됨
-        $(document).ready(function () {
-
-            loginUserId = loginInfo(); // 로그인된 사용자 아이디 가져오기
-
-            getNoticeInfo(); // 공지사항 상세 내역 가져오기
-
-            $("#btnEdit").on("click", function () { // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
-                doEdit(); // 공지사항 수정하기 실행
-            })
-
-            $("#btnDelete").on("click", function () { // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
-                doDelete(); // 공지사항 수정하기 실행
-            })
-
-            $("#btnList").on("click", function () { // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
-                location.href = "/notice/noticeList.html"; // 공지사항 리스트 이동
-            })
-        })
-
-        // 공지사항 상세 조회하기
+        // 공지사항 상세 조회
         function getNoticeInfo() {
+            return $.ajax({
+                url: apiUrl("/notice/v1/noticeInfo"),
+                type: "POST",
+                dataType: "JSON",
+                contentType: "application/json; charset=UTF-8",
+                xhrFields: {withCredentials: true}, // 서버가 세션/HttpOnly 쿠키 사용 시 필요
+                data: JSON.stringify({noticeSeq: nSeq, readCntYn: "Y"})
+            }).done(function (json) {
+                // 응답 포맷: { status, message, data } 또는 필드 평면형
+                const r = (json && json.data) ? json.data : json;
 
-            $.ajax({
-                url: "http://" + apiServer + "/notice/noticeInfo",
-                type: "post", // 전송방식은 Post
-                data: {"nSeq": nSeq, "readCntYn": "Y"}, // 글번호, 조회수 증가여부를 파라미터로 전달
-                dataType: "JSON", // 전송 결과는 JSON으로 받기
-                xhrFields: {
-                    withCredentials: true
+                authorUserId = r.userId || "";
+                $("#title").text(r.title ?? "");
+                $("#regDt").text(r.regDt ?? "");
+                $("#readCnt").text(r.readCnt ?? "");
+                $("#contents").html(r.contents ?? "");
+
+                // 공지글 여부 라디오 반영(보기 용도)
+                $(":radio[name='noticeYn'][value='" + (r.noticeYn || "N") + "']").prop("checked", true);
+
+                // 작성자 정보를 알게 되었으니 버튼 토글 시도
+                toggleAuthorButtons();
+            }).fail(function (jqXHR) {
+                const resp = jqXHR.responseJSON || {};
+                const msg = (resp.data && resp.data.msg) || resp.message || "요청 처리 중 오류가 발생했습니다.";
+                alert(msg);
+                // 열람은 permitAll이므로 401이라도 리다이렉트하지 않음
+            });
+        }
+
+        // 로그인 정보 조회 (리디렉션 없음)
+        function loadLoginInfoSilently() {
+            return fetchLoginInfo()
+                .done(function (res) {
+                    const data = res && res.data;
+                    const authed = !!(data && (data.userId || data.id || data.username));
+                    loginUser = authed ? data : null;
+                })
+                .fail(function () {
+                    loginUser = null;
+                })
+                .always(function () {
+                    toggleAuthorButtons();
+                });
+        }
+
+        // 이벤트 핸들러
+        function bindHandlers() {
+            $("#btnEdit").on("click", function () {
+                const currentUserId = loginUser && (loginUser.userId || loginUser.id || loginUser.username);
+                if (currentUserId === authorUserId) {
+                    location.href = "/notice/noticeEditInfo.html?nSeq=" + nSeq;
+                } else {
+                    alert("본인이 작성한 글만 수정 가능합니다.");
                 }
-            }).then(function (json) {
-                userId = json.userId; //작성자 아이디
-                $("#noticeList").append("<div class=\"divTableRow\">");
-                $("#title").append(json.title);
-                $("#regDt").append(json.regDt);
-                $("#readCnt").append(json.readCnt);
-                $("#contents").append(json.contents);
-
-                $(":radio[name='noticeYn'][value='" + json.noticeYn + "']").attr('checked', true);
-
             });
 
-        }
-
-        //수정하기
-        function doEdit() {
-            if (loginUserId === userId) {
-                location.href = "/notice/noticeEditInfo.html?nSeq=" + nSeq;
-
-            } else {
-                alert("본인이 작성한 글만 수정 가능합니다.");
-
-            }
-        }
-
-        //삭제하기
-        function doDelete() {
-            if (loginUserId === userId) {
-                if (confirm("작성한 글을 삭제하시겠습니까?")) {
-
-                    // Ajax 호출해서 글 삭제하기
-                    $.ajax({
-                        url: "http://" + apiServer + "/notice/noticeDelete",
-                        type: "post", // 전송방식은 Post
-                        dataType: "JSON", // 전송 결과는 JSON으로 받기
-                        data: {"nSeq": nSeq}, // form 태그 내 input 등 객체를 자동으로 전송할 형태로 변경하기
-                        success:
-                            function (json) { // /notice/noticeDelete 호출이 성공했다면..
-                                alert(json.msg); // 메시지 띄우기
-                                location.href = "/notice/noticeList.html"; // 공지사항 리스트 이동
-                            }
-                    })
+            $("#btnDelete").on("click", function () {
+                const currentUserId = loginUser && (loginUser.userId || loginUser.id || loginUser.username);
+                if (currentUserId !== authorUserId) {
+                    alert("본인이 작성한 글만 삭제 가능합니다.");
+                    return;
                 }
-            } else {
-                alert("본인이 작성한 글만 수정 가능합니다.");
+                if (!confirm("작성한 글을 삭제하시겠습니까?")) {
+                    return;
+                }
 
-            }
+                $.ajax({
+                    url: apiUrl("/notice/v1/noticeDelete"),
+                    type: "POST",
+                    dataType: "json",
+                    contentType: "application/json; charset=UTF-8",
+                    xhrFields: {withCredentials: true},
+                    data: JSON.stringify({nSeq: nSeq})
+                }).done(function (json) {
+                    const r = json || {};
+                    const msg = (r.data && r.data.msg) || r.message || "삭제되었습니다.";
+                    alert(msg);
+                    location.href = "/notice/noticeList.html";
+                }).fail(function (jqXHR) {
+                    const resp = jqXHR.responseJSON || {};
+                    const msg = (resp.data && resp.data.msg) || resp.message || "삭제 중 오류가 발생했습니다.";
+                    alert(msg);
+                    if (jqXHR.status === 401) {
+                        // 삭제는 인증 필요 → 로그인 페이지로 유도
+                        location.href = loginPage;
+                    }
+                });
+            });
+
+            $("#btnList").on("click", function () {
+                location.href = "/notice/noticeList.html";
+            });
         }
+
+        $(function () {
+            // 기본: 버튼은 숨김 후 시작
+            $("#btnEdit, #btnDelete").hide();
+
+            // 비동기 2건(로그인 상태, 글 상세) 병렬 조회 후 버튼 토글
+            $.when(loadLoginInfoSilently(), getNoticeInfo()).always(function () {
+                toggleAuthorButtons();
+            });
+
+            bindHandlers();
+        });
     </script>
 </head>
 <body>
@@ -123,40 +145,35 @@
 <div class="divTable minimalistBlack">
     <div class="divTableBody">
         <div class="divTableRow">
-            <div class="divTableCell">제목
-            </div>
+            <div class="divTableCell">제목</div>
             <div class="divTableCell" id="title"></div>
         </div>
         <div class="divTableRow">
-            <div class="divTableCell">공지글 여부
-            </div>
+            <div class="divTableCell">공지글 여부</div>
             <div class="divTableCell">
-                예<input type="radio" name="noticeYn" value="Y"/>
-                아니오<input type="radio" name="noticeYn" value="N"/>
+                예 <input type="radio" name="noticeYn" value="Y" disabled/>
+                아니오 <input type="radio" name="noticeYn" value="N" disabled/>
             </div>
         </div>
         <div class="divTableRow">
-            <div class="divTableCell">작성일
-            </div>
+            <div class="divTableCell">작성일</div>
             <div class="divTableCell" id="regDt"></div>
         </div>
         <div class="divTableRow">
-            <div class="divTableCell">조회수
-            </div>
+            <div class="divTableCell">조회수</div>
             <div class="divTableCell" id="readCnt"></div>
         </div>
         <div class="divTableRow">
-            <div class="divTableCell">내용
-            </div>
+            <div class="divTableCell">내용</div>
             <div class="divTableCell" id="contents"></div>
         </div>
     </div>
 </div>
+
 <div>
-    <button id="btnEdit" type="button">수정</button>
-    <button id="btnDelete" type="button">삭제</button>
+    <button id="btnEdit" type="button" style="display:none">수정</button>
+    <button id="btnDelete" type="button" style="display:none">삭제</button>
     <button id="btnList" type="button">목록</button>
 </div>
 </body>
 </html>
-

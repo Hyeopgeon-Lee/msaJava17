@@ -40,7 +40,7 @@ public class UserInfoService implements IUserInfoService {
      */
     @Override
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-        log.info(this.getClass().getName() + ".loadUserByUsername Start!");
+        log.info("{}.loadUserByUsername Start!", this.getClass().getName());
 
         // 로그인 요청한 사용자 아이디를 검색함
         // SELECT * FROM USER_INFO WHERE USER_ID = 'hglee67'
@@ -57,7 +57,7 @@ public class UserInfoService implements IUserInfoService {
     @Override
     public int insertUserInfo(UserInfoDTO pDTO) {
 
-        log.info(this.getClass().getName() + ".insertUserInfo Start!");
+        log.info("{}.insertUserInfo Start!", this.getClass().getName());
 
         int res = 0; // 회원가입 성공 : 1, 아이디 중복으로인한 가입 취소 : 2, 기타 에러 발생 : 0
 
@@ -69,13 +69,13 @@ public class UserInfoService implements IUserInfoService {
         String addr2 = CmmUtil.nvl(pDTO.addr2()); // 상세주소
         String roles = CmmUtil.nvl(pDTO.roles()); // 권한
 
-        log.info("userId : " + userId);
-        log.info("userName : " + userName);
-        log.info("password : " + password);
-        log.info("email : " + email);
-        log.info("addr1 : " + addr1);
-        log.info("addr2 : " + addr2);
-        log.info("roles : " + roles);
+        log.info("userId : {}", userId);
+        log.info("userName : {}", userName);
+        log.info("password : {}", password);
+        log.info("email : {}", email);
+        log.info("addr1 : {}", addr1);
+        log.info("addr2 : {}", addr2);
+        log.info("roles : {}", roles);
 
         // 회원 가입 중복 방지를 위해 DB에서 데이터 조회
         Optional<UserInfoEntity> rEntity = userInfoRepository.findByUserId(userId);
@@ -114,7 +114,7 @@ public class UserInfoService implements IUserInfoService {
             }
         }
 
-        log.info(this.getClass().getName() + ".insertUserInfo End!");
+        log.info("{}.insertUserInfo End!", this.getClass().getName());
 
         return res;
     }
@@ -122,12 +122,12 @@ public class UserInfoService implements IUserInfoService {
     @Override
     public UserInfoDTO getUserInfo(UserInfoDTO pDTO) throws Exception {
 
-        log.info(this.getClass().getName() + ".getUserInfo Start!");
+        log.info("{}.getUserInfo Start!", this.getClass().getName());
 
         // 회원아이디
         String user_id = CmmUtil.nvl(pDTO.userId());
 
-        log.info("user_id : " + user_id);
+        log.info("user_id : {}", user_id);
 
         UserInfoDTO rDTO = null;
 
@@ -136,25 +136,11 @@ public class UserInfoService implements IUserInfoService {
 
         // 값이 존재한다면..
         if (rEntity.isPresent()) {
-
             rDTO = UserInfoDTO.from(rEntity.get());
-
-//            // Entity -> DTO로 변경
-//            // DB 저장된 암호화된 Email 값을 복호화해서 DTO에 저장하기 위해 ObjectMapper 사용 안함
-//            rDTO = UserInfoDTO.builder()
-//                    .userId(CmmUtil.nvl(rEntity.get().getUserId()))
-//                    .userName(CmmUtil.nvl(rEntity.get().getUserName()))
-//
-//                    // 이메일 주소를 복호화해서 Record 저장하기
-//                    .email(EncryptUtil.decAES128CBC(CmmUtil.nvl(rEntity.get().getEmail())))
-//                    .addr1(CmmUtil.nvl(rEntity.get().getAddr1()))
-//                    .addr2(CmmUtil.nvl(rEntity.get().getAddr2()))
-//                    .roles(rEntity.get().getRoles())
-//                    .build();
 
         }
 
-        log.info(this.getClass().getName() + ".getUserInfo End!");
+        log.info("{}.getUserInfo End!", this.getClass().getName());
 
         return rDTO;
     }

@@ -1,64 +1,79 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <title>공지 리스트</title>
     <link rel="stylesheet" href="/css/table.css"/>
-    <script type="text/javascript" src="/js/common.js"></script>
-    <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
-    <script type="text/javascript">
 
+    <!-- 순서: jQuery → common.js (jquery.cookie 불필요) -->
+    <script src="/js/jquery-3.6.0.min.js"></script>
+    <script src="/js/common.js"></script>
+
+    <script type="text/javascript">
         // 상세보기
         function doDetail(seq) {
             location.href = "/notice/noticeInfo.html?nSeq=" + seq;
         }
 
-        // HTML로딩이 완료되고, 실행됨
-        $(document).ready(function () {
-
-            // Ajax 호출해서 멜론차트 조회하기
-            $.ajax({
-                url: "http://" + apiServer + "/notice/v1/noticeList",
-                type: "post", // 전송방식은 Post
-                xhrFields: {
-                    withCredentials: true
+        $(function () {
+            // 1) 로그인 여부에 따라 글쓰기 버튼 토글(API 기반)
+            checkLoginSilently({
+                onAuthed: function (user) {
+                    $("#btnReg").show();
                 },
-                dataType: "JSON" // 전송 결과는 JSON으로 받기
-            }).then(
-                function (json) { // 성공
+                onUnauthed: function () {
+                    $("#btnReg").hide();
+                }
+            });
 
-                    $("#noticeList").empty(); // 기존 조회 내용 지우기
+            // 2) 리스트 호출 (permitAll)
+            $.ajax({
+                url: apiUrl("/notice/v1/noticeList"),
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=UTF-8",
+                // 서버가 세션/HttpOnly 쿠키로 인증을 유지한다면 credentials 전송 필요
+                xhrFields: {withCredentials: true}
+            })
+                .done(function (json) {
+                    $("#noticeList").empty();
 
-                    const result = json.data;
+                    // { status, message, data } 형식 대응
+                    let payload = (json && json.data) ? json.data : [];
+                    let rows = Array.isArray(payload) ? payload : (payload.list || []);
 
-                    for (const data of result) {
-                        $("#noticeList").append("<div class=\"divTableRow\">");
+                    for (var i = 0; i < rows.length; i++) {
+                        var data = rows[i];
+                        $("#noticeList").append('<div class="divTableRow">');
 
-                        if (data.noticeYn === "Y") { // 글번호 출력
-                            $("#noticeList").append("<div class=\"divTableCell\">공지사항</div>");
-
+                        if (data.noticeYn === "Y") {
+                            $("#noticeList").append('<div class="divTableCell">공지사항</div>');
                         } else {
-                            $("#noticeList").append("<div class=\"divTableCell\">" + data.noticeSeq + "</div>");
-
+                            $("#noticeList").append('<div class="divTableCell">' + (data.noticeSeq ?? '') + '</div>');
                         }
 
                         $("#noticeList").append(
-                            "<div class=\"divTableCell\" onclick='doDetail(" + data.noticeSeq + ")'>"
-                            + data.title + "</div>");
-                        $("#noticeList").append("<div class=\"divTableCell\">" + data.readCnt + "</div>");
-                        $("#noticeList").append("<div class=\"divTableCell\">" + data.userName + "</div>");
-                        $("#noticeList").append("<div class=\"divTableCell\">" + data.regDt + "</div>");
-                        $("#noticeList").append("</div>");
+                            '<div class="divTableCell" style="cursor:pointer" onclick="doDetail(' + data.noticeSeq + ')">' +
+                            (data.title ?? '') +
+                            '</div>'
+                        );
+                        $("#noticeList").append('<div class="divTableCell">' + (data.readCnt ?? '') + '</div>');
+                        $("#noticeList").append('<div class="divTableCell">' + (data.userName ?? '') + '</div>');
+                        $("#noticeList").append('<div class="divTableCell">' + (data.regDt ?? '') + '</div>');
+                        $("#noticeList").append('</div>');
                     }
+                })
+                .fail(function (jqXHR) {
+                    var r = jqXHR.responseJSON || {};
+                    var msg = (r.data && r.data.msg) || r.message || "요청 처리 중 오류가 발생했습니다.";
+                    alert(msg);
 
-                },
-                function () {
-                    alert("접근 권한이 없습니다.");
-                    document.location.href = loginPage;
-                }
-            );
-
-        })
+                    // 혹시 목록 API가 인증을 요구하도록 바뀐 경우 대비
+                    if (jqXHR.status === 401) {
+                        location.href = loginPage;
+                    }
+                });
+        });
     </script>
 </head>
 <body>
@@ -75,9 +90,10 @@
             <div class="divTableHead">등록일</div>
         </div>
     </div>
-    <div class="divTableBody" id="noticeList">
-    </div>
+    <div class="divTableBody" id="noticeList"></div>
 </div>
-<a href="/notice/noticeReg.html">글쓰기</a>
+
+<!-- 로그인 시에만 노출 -->
+<a id="btnReg" href="/notice/noticeReg.html" style="display:none">글쓰기</a>
 </body>
 </html>

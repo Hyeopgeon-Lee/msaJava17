@@ -1,7 +1,42 @@
+# UserService/src/main/resources/application.yaml
 spring:
-  config:
-    import: "optional:configserver:http://localhost:8888"
-  cloud:
-    config:
-      name: user
-      profile: prod
+  application:
+    name: user-service
+  datasource:
+    url: jdbc:mariadb://localhost:3306/myDB
+    username: poly
+    password: 1234
+  jpa:
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    show-sql: true
+    open-in-view: false
+  data:
+    redis:
+      host: 192.168.133.128
+      port: 6379
+      username: poly
+      password: 1234
+server:
+  port: 9001
+
+jwt:
+  token:
+    creator: poly
+    access:
+      valid:
+        time: 300          # AT TTL(초) - 학습은 5분 추천, 게이트웨이 자동재발급 테스트 편함
+      name: jwtAccessToken   # HttpOnly 쿠키명(게이트웨이와 동일하게)
+    refresh:
+      valid:
+        time: 1209600      # RT TTL(초) - 14일 예시
+      name: jwtRefreshToken  # HttpOnly 쿠키명
+  secret:
+    key: "12345678123456781234567812345678123456781234"  # HS512 가능한 길이(실운영은 환경변수/암호화)
+app:
+  cookies:
+    secure: false
+    same-site: Lax
+

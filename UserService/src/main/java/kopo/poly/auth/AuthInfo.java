@@ -27,8 +27,8 @@ public record AuthInfo(UserInfoDTO userInfoDTO) implements UserDetails {
 
         String roles = CmmUtil.nvl(userInfoDTO.roles());
 
-        log.info("getAuthorities / roles : " + roles);
-        if (roles.length() > 0) { //DB에 저장된 Role이 있는 경우에만 실행
+        log.info("getAuthorities / roles : {}", roles);
+        if (!roles.isEmpty()) { //DB에 저장된 Role이 있는 경우에만 실행
             for (String role : roles.split(",")) {
                 pSet.add(new SimpleGrantedAuthority(role));
 
