@@ -8,8 +8,6 @@
     <script type="text/javascript" src="/js/jquery.serializeObject.min.js"></script>
     <script type="text/javascript" src="/js/common.js"></script>
     <script type="text/javascript">
-
-
         $(function () {
             $("#btnSend").on("click", doSubmit);
             $("#btnList").on("click", () => location.href = "/notice/noticeList.html");
@@ -37,38 +35,31 @@
                 return;
             }
 
-            const payload = {
-                title: f.title.value.trim(),
-                noticeYn,
-                contents: f.contents.value
-            };
-
             // 중복 클릭 방지
             $("#btnSend").prop("disabled", true).text("등록 중...");
 
             $.ajax({
                 url: apiUrl("/notice/v1/noticeInsert"),
                 method: "POST",
-                data: JSON.stringify(payload)
-            })
-                .done((res) => {
-                    // 공통 응답 포맷: { status, message, data: { result, msg } }
-                    if (res?.status === 200 && res?.data?.result === 1) {
-                        alert(res.data.msg || "등록되었습니다.");
-                        location.href = "/notice/noticeList.html";
-                        return;
-                    }
-                    // 비정상 응답이지만 200인 경우
-                    alert(res?.data?.msg || "등록에 실패했습니다. 다시 시도해 주세요.");
-                })
-                .fail((jq) => {
-                    // 401 → 게이트웨이가 자동 리프레시/재시도 하지만 실패 시 여기로 옵니다.
-                    const r = jq.responseJSON;
-                    alert(r?.data?.msg || r?.message || "에러가 발생했습니다. 잠시 후 다시 시도해 주세요.");
-                })
-                .always(() => {
-                    $("#btnSend").prop("disabled", false).text("등록");
-                });
+                data: JSON.stringify($("#f").serializeObject())
+
+            }).done((res) => {
+                // 공통 응답 포맷: { status, message, data: { result, msg } }
+                if (res?.status === 200 && res?.data?.result === 1) {
+                    alert(res.data.msg || "등록되었습니다.");
+                    location.href = "/notice/noticeList.html";
+                    return;
+                }
+                // 비정상 응답이지만 200인 경우
+                alert(res?.data?.msg || "등록에 실패했습니다. 다시 시도해 주세요.");
+
+            }).fail((jqXHR) => {
+                alert(extractErrorMessageFromXhr(jqXHR));
+
+            }).always(() => {
+                $("#btnSend").prop("disabled", false).text("등록");
+
+            });
         }
     </script>
 

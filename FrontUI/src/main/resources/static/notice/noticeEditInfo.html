@@ -4,118 +4,116 @@
     <meta charset="UTF-8">
     <title>공지사항 수정하기</title>
     <link rel="stylesheet" href="/css/table.css"/>
-    <script type="text/javascript" src="/js/common.js"></script>
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
-    <script type="text/javascript"
-            src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
-    <script type="text/javascript">
+    <script type="text/javascript" src="/js/jquery.serializeObject.min.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+    <script>
+        "use strict";
 
-        let param = new URLSearchParams(window.location.search);
-        const nSeq = param.get("nSeq"); // night; // 현재 글번호
+        const param = new URLSearchParams(location.search);
+        const nSeq = param.get("nSeq");
 
-        // HTML로딩이 완료되고, 실행됨
-        $(document).ready(function () {
+        // 페이지 로드
+        $(function () {
+            // nSeq 숨김필드 채우기(백엔드가 필요로 할 수 있음)
+            $("#noticeSeq").val(nSeq || "");
 
-            loginCheck(); // 로그인 여부 체크하기
-
-            getNoticeInfo(); // 공지사항 상세 내역 가져오기
-
-            // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
-            $("#btnSend").on("click", function () {
-                doSubmit(); // 공지사항 수정하기 실행
-            })
-        })
-
-        // 공지사항 내용 수정을 편하게하기 위해 상세 내역 조회하기
-        function getNoticeInfo() {
-
-            $.ajax({
-                url: "http://" + apiServer + "/notice/noticeInfo",
-                type: "post", // 전송방식은 Post
-                data: {"nSeq": nSeq, "readCntYn": "N"}, // 글번호, 조회수 증가여부를 파라미터로 전달
-                dataType: "JSON", // 전송 결과는 JSON으로 받기
-                xhrFields: {
-                    withCredentials: true
+            // 로그인 필수 화면: 미인증이면 로그인 페이지로
+            requireLogin({
+                redirect: true,
+                onAuthed: function () {
+                    bindHandlers();
+                    getNoticeInfo();
                 }
-            }).then(function (json) {
-                $("#title").val(json.title);
-                $("#regDt").val(json.regDt);
-                $("#readCnt").val(json.readCnt);
-                $("#contents").val(json.contents);
-
-                $(":radio[name='noticeYn'][value='" + json.noticeYn + "']").attr('checked', true);
-
             });
+        });
 
+        // 상세 조회
+        function getNoticeInfo() {
+            return $.ajax({
+                url: apiUrl("/notice/v1/noticeInfo"),
+                type: "POST",
+                data: JSON.stringify({noticeSeq: nSeq, readCntYn: "N"})
+
+            }).done(function (json) {
+                // {status,message,data} 또는 평면형 모두 대응
+                const r = (json && json.data) ? json.data : json || {};
+
+                $("#title").val(r.title ?? "");
+                $("#regDt").text(r.regDt ?? "");           // 표시용이면 input이 아니라 text로 유지
+                $("#readCnt").text(r.readCnt ?? "");       // 표시용
+                $("#contents").val(r.contents ?? "");
+
+                const yn = (r.noticeYn || "N").toUpperCase();
+                $(`input[name="noticeYn"][value="${yn}"]`).prop("checked", true);
+            })
+                .fail(function (jqXHR) {
+                    alert(extractErrorMessageFromXhr(jqXHR));
+                    if (jqXHR.status === 401) location.href = loginPage;
+                });
         }
 
-        //글자 길이 바이트 단위로 체크하기(바이트값 전달)
+        // 이벤트 바인딩
+        function bindHandlers() {
+            $("#btnSend").on("click", function () {
+                doSubmit();
+            });
+        }
+
+        // 유효성 검사: 바이트 카운트
         function calBytes(str) {
-            let tcount = 0;
-            let tmpStr = String(str);
-            let strCnt = tmpStr.length;
-            let onechar;
-            for (let i = 0; i < strCnt; i++) {
-                onechar = tmpStr.charAt(i);
-                if (escape(onechar).length > 4) {
-                    tcount += 2;
-                } else {
-                    tcount += 1;
-                }
-            }
-            return tcount;
+            let t = 0;
+            for (const ch of String(str)) t += escape(ch).length > 4 ? 2 : 1;
+            return t;
         }
 
-        // 공지사항 저장하기
+        // 수정 요청
         function doSubmit() {
+            const f = document.getElementById("f");
 
-            let f = document.getElementById("f"); // form 태그
-
-            if (f.title.value === "") {
+            // 기본 검증
+            if (!f.title.value.trim()) {
                 alert("제목을 입력하시기 바랍니다.");
                 f.title.focus();
                 return;
             }
             if (calBytes(f.title.value) > 200) {
-                alert("최대 200Bytes까지 입력 가능합니다.");
+                alert("제목은 최대 200Bytes까지 입력 가능합니다.");
                 f.title.focus();
                 return;
             }
-            let noticeCheck = false; //체크 여부 확인 변수
-            for (let i = 0; i < f.noticeYn.length; i++) {
-                if (f.noticeYn[i].checked) {
-                    noticeCheck = true;
-                    break;
-                }
-            }
-            if (noticeCheck === false) {
+            const noticeYn = $("input[name='noticeYn']:checked").val();
+            if (!noticeYn) {
                 alert("공지글 여부를 선택하시기 바랍니다.");
-                f.noticeYn[0].focus();
+                $("input[name='noticeYn']").first().focus();
                 return;
             }
-            if (f.contents.value === "") {
+            if (!f.contents.value.trim()) {
                 alert("내용을 입력하시기 바랍니다.");
                 f.contents.focus();
                 return;
             }
             if (calBytes(f.contents.value) > 4000) {
-                alert("최대 4000Bytes까지 입력 가능합니다.");
+                alert("내용은 최대 4000Bytes까지 입력 가능합니다.");
                 f.contents.focus();
                 return;
             }
 
-            // Ajax 호출해서 글 등록하기
             $.ajax({
-                    url: "/notice/noticeUpdate",
-                    type: "post", // 전송방식은 Post
-                    dataType: "JSON", // 전송 결과는 JSON으로 받기
-                    data: $("#f").serialize(), // form 태그 내 input 등 객체를 자동으로 전송할 형태로 변경하기
-                    success: function (json) { // /notice/noticeUpdate 호출이 성공했다면..
-                        alert(json.msg); // 메시지 띄우기
-                        location.href = "/notice/noticeList"; // 공지사항 리스트 이동
-                    }
-                }
-            )
+                url: apiUrl("/notice/v1/noticeUpdate"),
+                type: "POST",
+                data: JSON.stringify($("#f").serializeObject())
+
+            }).done(function (res) {
+                const msg = (res && res.data && res.data.msg) || res?.message || "수정되었습니다.";
+                alert(msg);
+                // 리스트 .html 경로로 이동
+                location.href = "/notice/noticeList.html";
+
+            }).fail(function (jqXHR) {
+                alert(extractErrorMessageFromXhr(jqXHR));
+                if (jqXHR.status === 401) location.href = loginPage;
+            });
         }
     </script>
 </head>
@@ -124,7 +122,7 @@
 <hr/>
 <br/>
 <form name="f" id="f">
-    <input type="hidden" name="nSeq" id="nSeq"/>
+    <input type="hidden" name="noticeSeq" id="noticeSeq"/>
     <div class="divTable minimalistBlack">
         <div class="divTableBody">
             <div class="divTableRow">

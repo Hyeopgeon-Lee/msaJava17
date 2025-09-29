@@ -16,6 +16,19 @@
         let loginUser = null;      // { userId, ... } 또는 null
         let authorUserId = "";     // 게시글 작성자 아이디
 
+        $(function () {
+            // 기본: 버튼은 숨김 후 시작
+            $("#btnEdit, #btnDelete").hide();
+
+            // 비동기 2건(로그인 상태, 글 상세) 병렬 조회 후 버튼 토글
+            $.when(loadLoginInfoSilently(), getNoticeInfo()).always(function () {
+                toggleAuthorButtons();
+            });
+
+            bindHandlers();
+        });
+
+
         // 버튼 토글 (로그인 사용자와 작성자가 동일할 때만 노출)
         function toggleAuthorButtons() {
             const currentUserId = loginUser && loginUser.userId;
@@ -33,9 +46,6 @@
             return $.ajax({
                 url: apiUrl("/notice/v1/noticeInfo"),
                 type: "POST",
-                dataType: "JSON",
-                contentType: "application/json; charset=UTF-8",
-                xhrFields: {withCredentials: true}, // 서버가 세션/HttpOnly 쿠키 사용 시 필요
                 data: JSON.stringify({noticeSeq: nSeq, readCntYn: "Y"})
             }).done(function (json) {
                 // 응답 포맷: { status, message, data } 또는 필드 평면형
@@ -53,10 +63,8 @@
                 // 작성자 정보를 알게 되었으니 버튼 토글 시도
                 toggleAuthorButtons();
             }).fail(function (jqXHR) {
-                const resp = jqXHR.responseJSON || {};
-                const msg = (resp.data && resp.data.msg) || resp.message || "요청 처리 중 오류가 발생했습니다.";
-                alert(msg);
-                // 열람은 permitAll이므로 401이라도 리다이렉트하지 않음
+                alert(extractErrorMessageFromXhr(jqXHR));
+
             });
         }
 
@@ -65,7 +73,7 @@
             return fetchLoginInfo()
                 .done(function (res) {
                     const data = res && res.data;
-                    const authed = !!(data && (data.userId || data.id || data.username));
+                    const authed = data.userId;
                     loginUser = authed ? data : null;
                 })
                 .fail(function () {
@@ -79,7 +87,7 @@
         // 이벤트 핸들러
         function bindHandlers() {
             $("#btnEdit").on("click", function () {
-                const currentUserId = loginUser && (loginUser.userId || loginUser.id || loginUser.username);
+                const currentUserId = loginUser.userId;
                 if (currentUserId === authorUserId) {
                     location.href = "/notice/noticeEditInfo.html?nSeq=" + nSeq;
                 } else {
@@ -88,7 +96,7 @@
             });
 
             $("#btnDelete").on("click", function () {
-                const currentUserId = loginUser && (loginUser.userId || loginUser.id || loginUser.username);
+                const currentUserId = loginUser.userId;
                 if (currentUserId !== authorUserId) {
                     alert("본인이 작성한 글만 삭제 가능합니다.");
                     return;
@@ -100,21 +108,16 @@
                 $.ajax({
                     url: apiUrl("/notice/v1/noticeDelete"),
                     type: "POST",
-                    dataType: "json",
-                    contentType: "application/json; charset=UTF-8",
-                    xhrFields: {withCredentials: true},
-                    data: JSON.stringify({nSeq: nSeq})
+                    data: JSON.stringify({noticeSeq: nSeq})
                 }).done(function (json) {
                     const r = json || {};
                     const msg = (r.data && r.data.msg) || r.message || "삭제되었습니다.";
                     alert(msg);
                     location.href = "/notice/noticeList.html";
                 }).fail(function (jqXHR) {
-                    const resp = jqXHR.responseJSON || {};
-                    const msg = (resp.data && resp.data.msg) || resp.message || "삭제 중 오류가 발생했습니다.";
-                    alert(msg);
+                    alert(extractErrorMessageFromXhr(jqXHR));
+
                     if (jqXHR.status === 401) {
-                        // 삭제는 인증 필요 → 로그인 페이지로 유도
                         location.href = loginPage;
                     }
                 });
@@ -124,18 +127,6 @@
                 location.href = "/notice/noticeList.html";
             });
         }
-
-        $(function () {
-            // 기본: 버튼은 숨김 후 시작
-            $("#btnEdit, #btnDelete").hide();
-
-            // 비동기 2건(로그인 상태, 글 상세) 병렬 조회 후 버튼 토글
-            $.when(loadLoginInfoSilently(), getNoticeInfo()).always(function () {
-                toggleAuthorButtons();
-            });
-
-            bindHandlers();
-        });
     </script>
 </head>
 <body>

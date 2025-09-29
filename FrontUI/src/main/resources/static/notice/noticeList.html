@@ -4,75 +4,90 @@
     <meta charset="UTF-8">
     <title>공지 리스트</title>
     <link rel="stylesheet" href="/css/table.css"/>
-
-    <!-- 순서: jQuery → common.js (jquery.cookie 불필요) -->
     <script src="/js/jquery-3.6.0.min.js"></script>
     <script src="/js/common.js"></script>
 
     <script type="text/javascript">
-        // 상세보기
+        /*
+         * doDetail 함수
+         * - 사용자가 공지사항 제목을 클릭하면 해당 공지의 상세 페이지로 이동합니다.
+         * - seq: 공지사항의 고유 번호(식별자)로, URL 파라미터로 전달됩니다.
+         */
         function doDetail(seq) {
             location.href = "/notice/noticeInfo.html?nSeq=" + seq;
         }
 
         $(function () {
-            // 1) 로그인 여부에 따라 글쓰기 버튼 토글(API 기반)
+            /*
+             * 1) 로그인 여부에 따라 글쓰기 버튼 토글
+             * - checkLoginSilently 함수는 현재 사용자가 로그인되어 있는지 확인합니다.
+             * - 로그인된 경우: 글쓰기 버튼(#btnReg)을 보여줍니다.
+             * - 로그인되지 않은 경우: 글쓰기 버튼을 숨깁니다.
+             */
             checkLoginSilently({
                 onAuthed: function (user) {
-                    $("#btnReg").show();
+                    $("#btnReg").show(); // 로그인 시 글쓰기 버튼 표시
                 },
                 onUnauthed: function () {
-                    $("#btnReg").hide();
+                    $("#btnReg").hide(); // 미로그인 시 글쓰기 버튼 숨김
                 }
             });
 
-            // 2) 리스트 호출 (permitAll)
+            /*
+             * 2) 공지사항 리스트 호출
+             * - 서버로부터 공지사항 목록을 받아와 화면에 표시합니다.
+             * - permitAll: 누구나 접근 가능한 API입니다.
+             * - POST 방식으로 /notice/v1/noticeList 엔드포인트에 요청합니다.
+             */
             $.ajax({
-                url: apiUrl("/notice/v1/noticeList"),
-                type: "POST",
-                dataType: "json",
-                contentType: "application/json; charset=UTF-8",
-                // 서버가 세션/HttpOnly 쿠키로 인증을 유지한다면 credentials 전송 필요
-                xhrFields: {withCredentials: true}
-            })
-                .done(function (json) {
-                    $("#noticeList").empty();
+                url: apiUrl("/notice/v1/noticeList"), // 공지사항 목록 API
+                type: "POST"
+            }).done(function (json) {
+                const result = json.data; // 서버에서 받은 공지사항 배열
 
-                    // { status, message, data } 형식 대응
-                    let payload = (json && json.data) ? json.data : [];
-                    let rows = Array.isArray(payload) ? payload : (payload.list || []);
+                /*
+                 * 공지사항 목록을 반복하며 화면에 추가합니다.
+                 * - 각 공지사항은 divTableRow로 한 줄씩 표시됩니다.
+                 * - 공지사항 여부(noticeYn)가 'Y'면 '공지사항'으로 표시, 아니면 글번호 표시
+                 * - 제목 클릭 시 상세보기로 이동(doDetail 함수 호출)
+                 * - 조회수, 등록자, 등록일도 각각 셀에 표시
+                 */
+                for (const data of result) {
+                    $("#noticeList").append("<div class=\"divTableRow\">");
 
-                    for (var i = 0; i < rows.length; i++) {
-                        var data = rows[i];
-                        $("#noticeList").append('<div class="divTableRow">');
-
-                        if (data.noticeYn === "Y") {
-                            $("#noticeList").append('<div class="divTableCell">공지사항</div>');
-                        } else {
-                            $("#noticeList").append('<div class="divTableCell">' + (data.noticeSeq ?? '') + '</div>');
-                        }
-
-                        $("#noticeList").append(
-                            '<div class="divTableCell" style="cursor:pointer" onclick="doDetail(' + data.noticeSeq + ')">' +
-                            (data.title ?? '') +
-                            '</div>'
-                        );
-                        $("#noticeList").append('<div class="divTableCell">' + (data.readCnt ?? '') + '</div>');
-                        $("#noticeList").append('<div class="divTableCell">' + (data.userName ?? '') + '</div>');
-                        $("#noticeList").append('<div class="divTableCell">' + (data.regDt ?? '') + '</div>');
-                        $("#noticeList").append('</div>');
+                    // 공지사항 여부에 따라 첫 번째 셀 내용 결정
+                    if (data.noticeYn === "Y") { // 공지사항인 경우
+                        $("#noticeList").append("<div class=\"divTableCell\">공지사항</div>");
+                    } else { // 일반 글인 경우 글번호 표시
+                        $("#noticeList").append("<div class=\"divTableCell\">" + data.noticeSeq + "</div>");
                     }
-                })
-                .fail(function (jqXHR) {
-                    var r = jqXHR.responseJSON || {};
-                    var msg = (r.data && r.data.msg) || r.message || "요청 처리 중 오류가 발생했습니다.";
-                    alert(msg);
 
-                    // 혹시 목록 API가 인증을 요구하도록 바뀐 경우 대비
-                    if (jqXHR.status === 401) {
-                        location.href = loginPage;
-                    }
-                });
+                    // 제목 셀: 클릭 시 상세보기로 이동
+                    $("#noticeList").append(
+                        "<div class=\"divTableCell\" onclick='doDetail(" + data.noticeSeq + ")'>"
+                        + data.title + "</div>");
+                    // 조회수 셀
+                    $("#noticeList").append("<div class=\"divTableCell\">" + data.readCnt + "</div>");
+                    // 등록자 셀
+                    $("#noticeList").append("<div class=\"divTableCell\">" + data.userName + "</div>");
+                    // 등록일 셀
+                    $("#noticeList").append("<div class=\"divTableCell\">" + data.regDt + "</div>");
+                    // 한 행의 끝
+                    $("#noticeList").append("</div>");
+                }
+
+            }).fail(function (jqXHR) {
+                // 서버에서 에러가 발생한 경우 사용자에게 알림창으로 메시지 표시
+                alert(extractErrorMessageFromXhr(jqXHR));
+
+                /*
+                 * 만약 목록 API가 인증을 요구하도록 변경된 경우(401 Unauthorized)
+                 * - 로그인 페이지로 이동하여 인증을 받도록 처리합니다.
+                 */
+                if (jqXHR.status === 401) {
+                    location.href = loginPage;
+                }
+            });
         });
     </script>
 </head>

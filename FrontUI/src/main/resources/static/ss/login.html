@@ -8,54 +8,83 @@
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" src="/js/jquery.serializeObject.min.js"></script>
     <script type="text/javascript" src="/js/common.js"></script>
-    <script type="text/javascript"
-            src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
-
+    <style>
+        .btn--loading {
+            opacity: .6;
+            pointer-events: none;
+        }
+    </style>
     <script>
-        $(document).ready(function () {
-            $("#btnUserReg").on("click", function () {
-                location.href = "/ss/userRegForm.html";
+        "use strict";
+
+        $(function () {
+            const params = new URLSearchParams(location.search);
+            const next = params.get("next") || "/user/loginResult.html";
+
+            $("#btnUserReg").on("click", () => location.href = "/ss/userRegForm.html");
+            $("#btnMain").on("click", () => location.href = "/index.html");
+
+            // Enter 제출 지원
+            $("#f").on("keydown", function (e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    $("#btnLogin").click();
+                }
             });
 
-            $("#btnMain").on("click", function () {
-                location.href = "/index.html";
-            });
+            let submitting = false;
 
             $("#btnLogin").on("click", function () {
-                const f = document.getElementById("f");
+                if (submitting) return;
 
-                if (!f.userId.value) { alert("아이디를 입력하세요."); f.userId.focus(); return; }
-                if (!f.password.value) { alert("비밀번호를 입력하세요."); f.password.focus(); return; }
+                const f = document.getElementById("f");
+                const userId = f.userId.value.trim();
+                const password = f.password.value;
+
+                if (!userId) {
+                    alert("아이디를 입력하세요.");
+                    f.userId.focus();
+                    return;
+                }
+                if (!password) {
+                    alert("비밀번호를 입력하세요.");
+                    f.password.focus();
+                    return;
+                }
+
+                // 버튼 상태 잠금
+                submitting = true;
+                const $btn = $("#btnLogin").addClass("btn--loading");
+                const prevText = $btn.text();
+                $btn.text("로그인 중...");
 
                 $.ajax({
                     url: apiUrl("/login/v1/loginProc"),
                     method: "POST",
-                    contentType: "application/json; charset=UTF-8",
-                    dataType: "json",
-                    xhrFields: { withCredentials: true },
-                    data: JSON.stringify({ userId: f.userId.value, password: f.password.value })
-                })
-                    .done(function (res) {
-                        // 로그인 성공(200 OK, result=1)
-                        if (res && res.data && res.data.result === 1) {
-                            alert(res.data.msg || "로그인 성공");
-                            location.href = "/user/loginResult.html";
-                        } else {
-                            // 혹시 컨트롤러에서 200 + result=0 으로 내려오는 경우도 대비
-                            alert((res && res.data && res.data.msg) || "로그인에 실패했습니다.");
-                            f.userId.focus();
-                        }
-                    })
-                    .fail(function (jqXHR) {
-                        // 401 등 오류일 때 서버가 준 메시지 보여주기
-                        const r = jqXHR.responseJSON;
-                        const msg =
-                            (r && r.data && r.data.msg) ||
-                            r?.message ||
-                            "에러가 발생하였습니다. \n다음에 다시 시도하길 바랍니다.";
-                        alert(msg);
+                    data: JSON.stringify({userId, password})
+
+                }).done(function (res) {
+                    // 표준 포맷: {status,message,data:{result,msg,...}}
+                    const ok = res && res.data && res.data.result === 1;
+                    const msg = (res && res.data && res.data.msg) || res?.message;
+
+                    if (ok) {
+                        if (msg) alert(msg);
+                        // next 파라미터가 있으면 해당 경로로
+                        location.href = next;
+                    } else {
+                        alert(msg || "로그인에 실패했습니다.");
                         f.userId.focus();
-                    });
+                    }
+
+                }).fail(function (jqXHR) {
+                    alert(extractErrorMessageFromXhr(jqXHR));
+                    f.userId.focus();
+
+                }).always(function () {
+                    submitting = false;
+                    $btn.removeClass("btn--loading").text(prevText);
+                });
             });
         });
     </script>
