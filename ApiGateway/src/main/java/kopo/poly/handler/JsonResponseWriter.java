@@ -70,8 +70,8 @@ public class JsonResponseWriter {
 
         ServerHttpResponse res = exchange.getResponse();
 
-        // ★★★ 여기 추가: 요청의 Origin을 응답 CORS 헤더에 반영
         String origin = exchange.getRequest().getHeaders().getOrigin();
+
         if (origin != null && !origin.isBlank()) {
             res.getHeaders().set("Access-Control-Allow-Origin", origin);
             res.getHeaders().set("Access-Control-Allow-Credentials", "true");

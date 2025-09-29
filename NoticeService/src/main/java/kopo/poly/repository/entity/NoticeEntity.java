@@ -58,5 +58,12 @@ public class NoticeEntity {
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private UserInfoEntity userInfo;
 
+    // 도메인 변경 메서드들만 노출 (Setter 금지)
+    public void change(String title, String noticeYn, String contents) {
+        // 필요하면 검증/정규화/권한 체크까지 포함
+        this.title = title;
+        this.noticeYn = noticeYn;
+        this.contents = contents;
+    }
 }
 

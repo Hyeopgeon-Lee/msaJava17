@@ -1,4 +1,3 @@
-// src/main/java/kopo/poly/config/SecurityConfig.java
 package kopo.poly.config;
 
 import kopo.poly.handler.AccessDeniedHandler;
@@ -51,11 +50,17 @@ public class SecurityConfig {
     @Value("${jwt.token.access.name}")
     private String accessCookieName; // 예) jwtAccessToken
 
-    // ---- 퍼블릭 경로를 상수로 한 군데에만 관리 ----
     /**
      * 인증 없이 접근 가능한 경로 목록입니다.
-     * 예) 로그인, 회원가입, 공지 조회, Swagger, Actuator 등
-     * 이 경로들은 인증/인가 필터를 건너뜁니다.
+     * - 로그인, 회원가입, 공지 조회, Swagger, Actuator 등
+     * - 이 경로들은 인증/인가 필터를 건너뜁니다.
+     * - 경로 패턴은 Spring의 PathPattern 문법을 따릅니다.
+     *
+     * [퍼블릭 경로 추가 위치]
+     * -------------------------------------------------------------
+     * 새로운 퍼블릭 경로를 추가하려면 아래 배열에 경로 패턴을 이어서 작성하면 됩니다.
+     * 예시)
+     * "/example/public/**",
      */
     private static final String[] PUBLIC_PATHS = {
             "/login/**",
@@ -66,6 +71,7 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/actuator/**"
+            // [여기에 추가]
     };
 
     // 경로 패턴 매칭을 위한 파서 객체
@@ -73,8 +79,8 @@ public class SecurityConfig {
 
     /**
      * 현재 요청 경로가 퍼블릭 경로에 해당하는지 검사합니다.
-     * @param path 요청 경로
-     * @return 퍼블릭 경로면 true, 아니면 false
+     * - 요청 경로(path)가 PUBLIC_PATHS 배열의 패턴과 일치하면 true 반환
+     * - 예: /login/abc, /notice/v1/noticeList 등
      */
     private static boolean isPublicPath(String path) {
         PathContainer pc = PathContainer.parsePath(path);
@@ -127,10 +133,18 @@ public class SecurityConfig {
 
     /**
      * Spring Security의 핵심 필터 체인 설정
+     * -------------------------------------------------------------
      * - CSRF, 폼로그인, HTTP Basic 모두 비활성화
      * - 인증/인가 예외 핸들러 지정
      * - 리소스 서버(JWT) 인증 방식 지정
      * - 경로별 권한 규칙 지정
+     *
+     * [추가 라우팅 및 권한 규칙 작성 위치]
+     * -------------------------------------------------------------
+     * 새로운 API 경로에 대한 권한 규칙을 추가하려면 아래 authorizeExchange() 내부에 .pathMatchers()를 이어서 작성하면 됩니다.
+     * 예시)
+     * .pathMatchers("/example/v1/**").permitAll() // 누구나 접근 가능
+     * .pathMatchers("/admin/**").hasRole("ADMIN") // ADMIN 권한 필요
      */
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(
@@ -174,6 +188,7 @@ public class SecurityConfig {
                         .pathMatchers("/notice/v1/noticeInsert",
                                 "/notice/v1/noticeUpdate",
                                 "/notice/v1/noticeDelete").hasRole("USER") // 공지 등록/수정/삭제는 USER 권한 필요
+                        // [여기에 추가]
                         .anyExchange().authenticated())                      // 그 외는 인증 필요
                 .build();
     }

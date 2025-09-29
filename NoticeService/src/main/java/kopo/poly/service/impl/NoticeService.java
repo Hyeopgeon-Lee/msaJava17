@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -26,7 +27,8 @@ public class NoticeService implements INoticeService {
     @Override
     public List<NoticeDTO> getNoticeList() {
 
-        log.info(this.getClass().getName() + ".getNoticeList Start!");
+        // 서비스 시작 로그
+        log.info("{} getNoticeList Start!", this.getClass().getName());
 
         // 공지사항 전체 리스트 조회하기
         List<NoticeEntity> rList = noticeRepository.getNoticeList();
@@ -34,7 +36,8 @@ public class NoticeService implements INoticeService {
         // 엔티티의 값들을 DTO에 맞게 넣어주기
         List<NoticeDTO> nList = NoticeDTO.from(rList);
 
-        log.info(this.getClass().getName() + ".getNoticeList End!");
+        // 서비스 종료 로그
+        log.info("{} getNoticeList End!", this.getClass().getName());
 
         return nList;
     }
@@ -43,14 +46,15 @@ public class NoticeService implements INoticeService {
     @Override
     public NoticeDTO getNoticeInfo(NoticeDTO pDTO, boolean type) {
 
-        log.info(this.getClass().getName() + ".getNoticeInfo Start!");
+        // 서비스 시작 로그
+        log.info("{} getNoticeInfo Start!", this.getClass().getName());
 
         if (type) {
             // 조회수 증가하기
             int res = noticeRepository.updateReadCnt(pDTO.noticeSeq());
 
             // 조회수 증가 성공여부 체크
-            log.info("res : " + res);
+            log.info("조회수 증가 결과: {}", res);
         }
 
         // 공지사항 상세내역 가져오기
@@ -59,7 +63,8 @@ public class NoticeService implements INoticeService {
         // 엔티티의 값들을 DTO에 맞게 넣어주기
         NoticeDTO rDTO = NoticeDTO.from(rEntity);
 
-        log.info(this.getClass().getName() + ".getNoticeInfo End!");
+        // 서비스 종료 로그
+        log.info("{} getNoticeInfo End!", this.getClass().getName());
 
         return rDTO;
     }
@@ -68,67 +73,65 @@ public class NoticeService implements INoticeService {
     @Override
     public void updateNoticeInfo(NoticeDTO pDTO) {
 
-        log.info(this.getClass().getName() + ".updateNoticeInfo Start!");
+        // 서비스 시작 로그
+        log.info("{} updateNoticeInfo Start!", this.getClass().getName());
 
         Long noticeSeq = pDTO.noticeSeq();
 
-        String title = CmmUtil.nvl(pDTO.title());
-        String noticeYn = CmmUtil.nvl(pDTO.noticeYn());
-        String contents = CmmUtil.nvl(pDTO.contents());
-        String userId = CmmUtil.nvl(pDTO.userId());
-
-        log.info("noticeSeq : " + noticeSeq);
-        log.info("title : " + title);
-        log.info("noticeYn : " + noticeYn);
-        log.info("contents : " + contents);
-        log.info("userId : " + userId);
+        // 입력받은 DTO 정보 로그
+        log.info("pDTO: {}", pDTO);
 
         // 현재 공지사항 조회수 가져오기
-        NoticeEntity rEntity = noticeRepository.findByNoticeSeq(noticeSeq);
+        NoticeEntity entity = noticeRepository.findById(noticeSeq)
+                .orElseThrow(() -> new NoSuchElementException("공지 없음: " + noticeSeq));
 
         // 수정할 값들을 빌더를 통해 엔티티에 저장하기
-        NoticeEntity pEntity = NoticeEntity.builder()
-                .noticeSeq(noticeSeq).title(title).noticeYn(noticeYn).contents(contents).userId(userId)
-                .readCnt(rEntity.getReadCnt())
-                .build();
+        entity.change(
+                CmmUtil.nvl(pDTO.title()),
+                CmmUtil.nvl(pDTO.noticeYn()),
+                CmmUtil.nvl(pDTO.contents())
+        );
 
-        // 데이터 수정하기
-        noticeRepository.save(pEntity);
 
-        log.info(this.getClass().getName() + ".updateNoticeInfo End!");
+        // 서비스 종료 로그
+        log.info("{} updateNoticeInfo End!", this.getClass().getName());
 
     }
 
     @Override
     public void deleteNoticeInfo(NoticeDTO pDTO) {
 
-        log.info(this.getClass().getName() + ".deleteNoticeInfo Start!");
+        // 서비스 시작 로그
+        log.info("{} deleteNoticeInfo Start!", this.getClass().getName());
 
         Long noticeSeq = pDTO.noticeSeq();
 
-        log.info("noticeSeq : " + noticeSeq);
+        // 삭제할 공지사항 번호 로그
+        log.info("noticeSeq: {}", noticeSeq);
 
-        // 데이터 수정하기
+        // 데이터 삭제하기
         noticeRepository.deleteById(noticeSeq);
 
-
-        log.info(this.getClass().getName() + ".deleteNoticeInfo End!");
+        // 서비스 종료 로그
+        log.info("{} deleteNoticeInfo End!", this.getClass().getName());
     }
 
     @Override
     public void insertNoticeInfo(NoticeDTO pDTO) {
 
-        log.info(this.getClass().getName() + ".insertNoticeInfo Start!");
+        // 서비스 시작 로그
+        log.info("{} insertNoticeInfo Start!", this.getClass().getName());
 
         String title = CmmUtil.nvl(pDTO.title());
         String noticeYn = CmmUtil.nvl(pDTO.noticeYn());
         String contents = CmmUtil.nvl(pDTO.contents());
         String userId = CmmUtil.nvl(pDTO.userId());
 
-        log.info("title : " + title);
-        log.info("noticeYn : " + noticeYn);
-        log.info("contents : " + contents);
-        log.info("userId : " + userId);
+        // 입력값 로그
+        log.info("title: {}", title);
+        log.info("noticeYn: {}", noticeYn);
+        log.info("contents: {}", contents);
+        log.info("userId: {}", userId);
 
         // 공지사항 저장을 위해서는 PK 값은 빌더에 추가하지 않는다.
         // JPA에 자동 증가 설정을 해놨음
@@ -141,7 +144,8 @@ public class NoticeService implements INoticeService {
         // 공지사항 저장하기
         noticeRepository.save(pEntity);
 
-        log.info(this.getClass().getName() + ".insertNoticeInfo End!");
+        // 서비스 종료 로그
+        log.info("{} insertNoticeInfo End!", this.getClass().getName());
 
     }
 }
