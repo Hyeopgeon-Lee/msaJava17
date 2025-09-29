@@ -69,24 +69,8 @@ api:
       host: localhost
       port: 9002
 
-security:
-  public-paths:
-    - /login/**
-    - /reg/**
-    - /notice/v1/noticeList
-    - /notice/v1/noticeInfo
-    - /v3/api-docs/**
-    - /swagger-ui/**
-    - /swagger-ui.html
-    - /actuator/**
-
-
 logging:
   level:
     org.springframework.security.oauth2.server.resource: DEBUG
     org.springframework.cloud.gateway: INFO      # 필요 시 DEBUG로
 
-app:
-  cors:
-    # 💡 여러 오리진이 필요하면 콤마로 추가: http://localhost:14000,http://127.0.0.1:14000
-    allowed-origins: http://localhost:14000
