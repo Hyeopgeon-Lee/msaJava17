@@ -39,4 +39,8 @@ app:
   cookies:
     secure: false
     same-site: Lax
+    domain: localhost
+    http-only: true
+    path: /
+
 

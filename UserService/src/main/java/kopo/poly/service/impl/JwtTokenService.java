@@ -52,6 +52,13 @@ public class JwtTokenService implements IJwtTokenService {
     private boolean cookieSecure;
     @Value("${app.cookies.same-site}")
     private String cookieSameSite;
+    @Value("${app.cookies.domain")
+    private String cookieDomain;
+    @Value("${app.cookies.http-only")
+    private boolean cookieHttpOnly;
+    @Value("${app.cookies.path")
+    private String cookiePath;
+
 
     // ====== 내부 로직 ======
     private String encodeAccess(UserInfoDTO user, long ttlSec) {
@@ -116,18 +123,20 @@ public class JwtTokenService implements IJwtTokenService {
         log.info("{}.writeTokensAsCookies Start!", getClass().getName());
 
         ResponseCookie at = ResponseCookie.from(accessCookie, accessToken)
-                .httpOnly(true)
+                .httpOnly(cookieHttpOnly)
                 .secure(cookieSecure)
-                .path("/")
+                .domain(cookieDomain)
+                .path(cookiePath)
                 .sameSite(cookieSameSite)
                 .maxAge(accessTtlSec)
                 .build();
 
         // ★ 쿠키에는 진짜 RT가 아닌 "핸들"을 넣습니다.
         ResponseCookie rt = ResponseCookie.from(refreshCookie, refreshHandle)
-                .httpOnly(true)
+                .httpOnly(cookieHttpOnly)
                 .secure(cookieSecure)
-                .path("/")
+                .domain(cookieDomain)
+                .path(cookiePath)
                 .sameSite(cookieSameSite)
                 .maxAge(refreshTtlSec)
                 .build();
