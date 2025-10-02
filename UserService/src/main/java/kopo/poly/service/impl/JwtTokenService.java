@@ -52,15 +52,24 @@ public class JwtTokenService implements IJwtTokenService {
     private boolean cookieSecure;
     @Value("${app.cookies.same-site}")
     private String cookieSameSite;
-    @Value("${app.cookies.domain")
+    @Value("${app.cookies.domain}")
     private String cookieDomain;
-    @Value("${app.cookies.http-only")
+    @Value("${app.cookies.http-only}")
     private boolean cookieHttpOnly;
-    @Value("${app.cookies.path")
+    @Value("${app.cookies.path}")
     private String cookiePath;
 
 
     // ====== 내부 로직 ======
+
+    private static List<String> splitRoles(String roles) {
+        if (roles == null || roles.isBlank()) return List.of("USER");
+        return Arrays.stream(roles.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
+    }
+
     private String encodeAccess(UserInfoDTO user, long ttlSec) {
         Instant now = Instant.now();
         List<String> roles = splitRoles(user.roles());
@@ -79,15 +88,6 @@ public class JwtTokenService implements IJwtTokenService {
         return jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
     }
 
-    private static List<String> splitRoles(String roles) {
-        if (roles == null || roles.isBlank()) return List.of("USER");
-        return Arrays.stream(roles.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.toList());
-    }
-
-    // ====== IJwtTokenService 구현 ======
 
     /**
      * Access Token(JWT) 발급

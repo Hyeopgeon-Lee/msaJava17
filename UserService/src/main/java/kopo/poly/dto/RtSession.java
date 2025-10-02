@@ -1,5 +1,7 @@
 package kopo.poly.dto;
 
+import lombok.Builder;
+
 import java.util.List;
 
 /**
@@ -7,6 +9,7 @@ import java.util.List;
  * AT 재발급에 필요한 클레임(userId, userName, roles)과
  * 보안 메타데이터(uaHash, issuedAt)를 포함한다.
  */
+@Builder
 public record RtSession(
         String userId,
         String userName,
@@ -15,3 +18,4 @@ public record RtSession(
         String issuedAt
 ) {
 }
+
