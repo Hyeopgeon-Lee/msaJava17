@@ -43,4 +43,12 @@ app:
     http-only: true
     path: /
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,shutdown   # shutdown 노출
+  endpoint:
+    shutdown:
+      enabled: true                     # shutdown 활성화
 

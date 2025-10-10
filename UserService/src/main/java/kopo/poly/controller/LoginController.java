@@ -31,7 +31,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 public class LoginController {
-
     private final AuthenticationManager authenticationManager;
     private final IJwtTokenService jwtTokenService;
     private final IRefreshTokenRedisService refreshTokenRedisService;
@@ -39,6 +38,10 @@ public class LoginController {
     @Value("${jwt.token.refresh.name:jwtRefreshToken}")
     private String rtCookieName;
 
+    /**
+     * 로그인 처리
+     * - 인증 성공 시 AT/RT 쿠키 발급
+     */
     @Operation(
             summary = "로그인 처리",
             description = """
@@ -74,7 +77,10 @@ public class LoginController {
         return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK, "OK", dto));
     }
 
-    // LoginController.java - loginInfo 수정본
+    /**
+     * 현재 로그인 사용자 정보 반환
+     * - JWT에서 정보 추출, 미로그인 시 빈 정보 반환
+     */
     @Operation(
             summary = "현재 로그인 사용자 조회",
             description = """
@@ -117,6 +123,10 @@ public class LoginController {
     }
 
 
+    /**
+     * AT/RT 재발급(리프레시)
+     * - 쿠키의 RT 핸들 검증 후 새 토큰 발급
+     */
     @Operation(
             summary = "AT/RT 재발급(리프레시)",
             description = "HttpOnly 쿠키에 담긴 RT-핸들을 검증하여 새 AccessToken과 새 RT-핸들을 다시 쿠키로 내려줍니다.",
@@ -140,7 +150,6 @@ public class LoginController {
             }
         }
 
-        // ✅ 로그 포맷 수정
         log.info("rtCookieName={} / handle={}", rtCookieName, handle);
 
         if (handle == null || handle.isBlank()) {
@@ -153,7 +162,6 @@ public class LoginController {
         String ua = request.getHeader("User-Agent");
         var rec = refreshTokenRedisService.validate(handle, ua); // null이면 무효/만료/UA불일치
 
-        // ✅ 로그 포맷 수정
         log.info("rec={} / ua={}", rec, ua);
 
         if (rec == null) {
@@ -170,7 +178,7 @@ public class LoginController {
                 .build();
 
         // 4) 새 AT/RT-핸들을 쿠키로 발급
-        // ✅ UA 바인딩으로 재발급
+        // UA 바인딩으로 재발급
         jwtTokenService.issueTokens(user, ua, response);
 
         // 5) 기존 핸들은 폐기(세션 회전)
