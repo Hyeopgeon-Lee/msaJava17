@@ -19,34 +19,18 @@ import java.util.stream.Collectors;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CommonResponse<T> {
 
-    /**
-     * HTTP 상태코드 숫자값 (e.g., 200, 400)
-     */
+    // HTTP 상태코드
     private final int status;
-
-    /**
-     * 사람이 읽을 메시지 (e.g., OK, VALIDATION_ERROR, etc.)
-     */
+    // 응답 메시지
     private final String message;
-
-    /**
-     * 실제 페이로드
-     */
+    // 응답 데이터
     private final T data;
-
-    /**
-     * 요청 경로 (디버깅/로깅 편의)
-     */
+    // 요청 경로
     private final String path;
-
-    /**
-     * 응답 시각
-     */
+    // 응답 시각
     private final Instant timestamp;
 
-    /* ------------------------------------------------------------------------------------
-   내부 유틸: 현재 요청 경로
-   ------------------------------------------------------------------------------------ */
+    // 현재 요청 경로 반환
     private static String currentPath() {
         try {
             ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
@@ -67,9 +51,7 @@ public class CommonResponse<T> {
         this.timestamp = timestamp;
     }
 
-    /* ------------------------------------------------------------------------------------
-       기본 팩토리: 기존 컨트롤러와 호환 (HttpStatus + message + data)
-       ------------------------------------------------------------------------------------ */
+    // CommonResponse 객체 생성
     public static <T> CommonResponse<T> of(HttpStatus httpStatus, String message, T data) {
         return CommonResponse.<T>builder()
                 .status(httpStatus.value())
@@ -80,39 +62,35 @@ public class CommonResponse<T> {
                 .build();
     }
 
-    /* ------------------------------------------------------------------------------------
-       편의 메서드: 컨트롤러에서 더 간결하게 사용
-       ------------------------------------------------------------------------------------ */
+    // 200 OK 응답
     public static <T> ResponseEntity<CommonResponse<T>> ok(T data) {
         return ResponseEntity.ok(
                 of(HttpStatus.OK, HttpStatus.OK.series().name(), data)
         );
     }
 
+    // 커스텀 상태 응답
     public static <T> ResponseEntity<CommonResponse<T>> status(HttpStatus status, String message, T data) {
         return ResponseEntity.status(status).body(of(status, message, data));
     }
 
+    // 400 Bad Request 응답
     public static <T> ResponseEntity<CommonResponse<T>> badRequest(String message, T data) {
         return status(HttpStatus.BAD_REQUEST, message, data);
     }
 
+    // 에러 응답
     public static <T> ResponseEntity<CommonResponse<T>> error(HttpStatus status, String message) {
         return status(status, message, null);
     }
 
-    /* ------------------------------------------------------------------------------------
-       BindingResult → 에러 문자열 리스트로 변환 (제네릭 안전)
-       ------------------------------------------------------------------------------------ */
+    // 바인딩 에러 리스트 반환
     public static ResponseEntity<CommonResponse<List<String>>> getErrors(BindingResult bindingResult) {
         List<String> errors = bindingResult.getAllErrors().stream()
-                .map(e -> (e.getObjectName() != null ? e.getObjectName() + ": " : "") +
-                        (e.getDefaultMessage() != null ? e.getDefaultMessage() : "Invalid"))
+                .map(e -> e.getObjectName() + ": " + (e.getDefaultMessage() != null ? e.getDefaultMessage() : "Invalid"))
                 .collect(Collectors.toList());
-
         return ResponseEntity.badRequest().body(
                 of(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.series().name(), errors)
         );
     }
-
 }

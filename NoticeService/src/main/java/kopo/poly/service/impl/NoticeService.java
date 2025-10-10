@@ -14,138 +14,115 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+/**
+ * NoticeService는 공지사항 관련 비즈니스 로직을 처리하는 서비스 클래스입니다.
+ * 데이터베이스와 연동하여 공지사항의 조회, 상세조회, 등록, 수정, 삭제 기능을 제공합니다.
+ * 각 메서드에 기능별 주석을 추가하여 대학생이 쉽게 이해할 수 있도록 작성했습니다.
+ * 추가 라우팅 및 퍼블릭 경로가 필요하다면, 관련 메서드를 이 위치에 추가할 수 있습니다.
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class NoticeService implements INoticeService {
 
-    // RequiredArgsConstructor 어노테이션으로 생성자를 자동 생성함
-    // noticeRepository 변수에 이미 메모리에 올라간 NoticeRepository 객체를 넣어줌
-    // 예전에는 autowired 어노테이션를 통해 설정했었지만, 이젠 생성자를 통해 객체 주입함
+    // 생성자를 통해 NoticeRepository 객체를 주입받아 사용합니다.
     private final NoticeRepository noticeRepository;
 
+    /**
+     * 모든 공지사항 목록을 조회합니다.
+     *
+     * @return 공지사항 리스트
+     */
     @Override
     public List<NoticeDTO> getNoticeList() {
-
-        // 서비스 시작 로그
-        log.info("{} getNoticeList Start!", this.getClass().getName());
-
-        // 공지사항 전체 리스트 조회하기
-        List<NoticeEntity> rList = noticeRepository.getNoticeList();
-
-        // 엔티티의 값들을 DTO에 맞게 넣어주기
-        List<NoticeDTO> nList = NoticeDTO.from(rList);
-
-        // 서비스 종료 로그
-        log.info("{} getNoticeList End!", this.getClass().getName());
-
+        log.info("{} getNoticeList Start!", this.getClass().getName()); // 서비스 시작 로그
+        List<NoticeEntity> rList = noticeRepository.getNoticeList(); // 공지사항 전체 리스트 조회
+        List<NoticeDTO> nList = NoticeDTO.from(rList); // 엔티티를 DTO로 변환
+        log.info("{} getNoticeList End!", this.getClass().getName()); // 서비스 종료 로그
         return nList;
     }
 
+    /**
+     * 공지사항 상세 정보를 조회합니다.
+     *
+     * @param pDTO 조회할 공지사항 정보
+     * @param type 조회수 증가 여부(true: 증가, false: 증가 안함)
+     * @return 상세 공지사항 정보
+     */
     @Transactional
     @Override
     public NoticeDTO getNoticeInfo(NoticeDTO pDTO, boolean type) {
-
-        // 서비스 시작 로그
-        log.info("{} getNoticeInfo Start!", this.getClass().getName());
-
+        log.info("{} getNoticeInfo Start!", this.getClass().getName()); // 서비스 시작 로그
         if (type) {
-            // 조회수 증가하기
-            int res = noticeRepository.updateReadCnt(pDTO.noticeSeq());
-
-            // 조회수 증가 성공여부 체크
-            log.info("조회수 증가 결과: {}", res);
+            int res = noticeRepository.updateReadCnt(pDTO.noticeSeq()); // 조회수 증가
+            log.info("조회수 증가 결과: {}", res); // 조회수 증가 결과 로그
         }
-
-        // 공지사항 상세내역 가져오기
-        NoticeEntity rEntity = noticeRepository.findByNoticeSeq(pDTO.noticeSeq());
-
-        // 엔티티의 값들을 DTO에 맞게 넣어주기
-        NoticeDTO rDTO = NoticeDTO.from(rEntity);
-
-        // 서비스 종료 로그
-        log.info("{} getNoticeInfo End!", this.getClass().getName());
-
+        NoticeEntity rEntity = noticeRepository.findByNoticeSeq(pDTO.noticeSeq()); // 공지사항 상세내역 조회
+        NoticeDTO rDTO = NoticeDTO.from(rEntity); // 엔티티를 DTO로 변환
+        log.info("{} getNoticeInfo End!", this.getClass().getName()); // 서비스 종료 로그
         return rDTO;
     }
 
+    /**
+     * 공지사항 정보를 수정합니다.
+     *
+     * @param pDTO 수정할 공지사항 정보
+     */
     @Transactional
     @Override
     public void updateNoticeInfo(NoticeDTO pDTO) {
-
-        // 서비스 시작 로그
-        log.info("{} updateNoticeInfo Start!", this.getClass().getName());
-
+        log.info("{} updateNoticeInfo Start!", this.getClass().getName()); // 서비스 시작 로그
         Long noticeSeq = pDTO.noticeSeq();
-
-        // 입력받은 DTO 정보 로그
-        log.info("pDTO: {}", pDTO);
-
-        // 현재 공지사항 조회수 가져오기
+        log.info("pDTO: {}", pDTO); // 입력받은 DTO 정보 로그
         NoticeEntity entity = noticeRepository.findById(noticeSeq)
-                .orElseThrow(() -> new NoSuchElementException("공지 없음: " + noticeSeq));
-
-        // 수정할 값들을 빌더를 통해 엔티티에 저장하기
+                .orElseThrow(() -> new NoSuchElementException("공지 없음: " + noticeSeq)); // 기존 공지사항 조회
         entity.change(
                 CmmUtil.nvl(pDTO.title()),
                 CmmUtil.nvl(pDTO.noticeYn()),
                 CmmUtil.nvl(pDTO.contents())
-        );
-
-
-        // 서비스 종료 로그
-        log.info("{} updateNoticeInfo End!", this.getClass().getName());
-
+        ); // 수정할 값 저장
+        log.info("{} updateNoticeInfo End!", this.getClass().getName()); // 서비스 종료 로그
     }
 
+    /**
+     * 공지사항 정보를 삭제합니다.
+     *
+     * @param pDTO 삭제할 공지사항 정보
+     */
     @Override
     public void deleteNoticeInfo(NoticeDTO pDTO) {
-
-        // 서비스 시작 로그
-        log.info("{} deleteNoticeInfo Start!", this.getClass().getName());
-
+        log.info("{} deleteNoticeInfo Start!", this.getClass().getName()); // 서비스 시작 로그
         Long noticeSeq = pDTO.noticeSeq();
-
-        // 삭제할 공지사항 번호 로그
-        log.info("noticeSeq: {}", noticeSeq);
-
-        // 데이터 삭제하기
-        noticeRepository.deleteById(noticeSeq);
-
-        // 서비스 종료 로그
-        log.info("{} deleteNoticeInfo End!", this.getClass().getName());
+        log.info("noticeSeq: {}", noticeSeq); // 삭제할 공지사항 번호 로그
+        noticeRepository.deleteById(noticeSeq); // 데이터 삭제
+        log.info("{} deleteNoticeInfo End!", this.getClass().getName()); // 서비스 종료 로그
     }
 
+    /**
+     * 공지사항 정보를 등록합니다.
+     *
+     * @param pDTO 등록할 공지사항 정보
+     */
     @Override
     public void insertNoticeInfo(NoticeDTO pDTO) {
-
-        // 서비스 시작 로그
-        log.info("{} insertNoticeInfo Start!", this.getClass().getName());
-
+        log.info("{} insertNoticeInfo Start!", this.getClass().getName()); // 서비스 시작 로그
         String title = CmmUtil.nvl(pDTO.title());
         String noticeYn = CmmUtil.nvl(pDTO.noticeYn());
         String contents = CmmUtil.nvl(pDTO.contents());
         String userId = CmmUtil.nvl(pDTO.userId());
-
-        // 입력값 로그
         log.info("title: {}", title);
         log.info("noticeYn: {}", noticeYn);
         log.info("contents: {}", contents);
-        log.info("userId: {}", userId);
-
-        // 공지사항 저장을 위해서는 PK 값은 빌더에 추가하지 않는다.
-        // JPA에 자동 증가 설정을 해놨음
+        log.info("userId: {}", userId); // 입력값 로그
         NoticeEntity pEntity = NoticeEntity.builder()
                 .title(title).noticeYn(noticeYn).contents(contents).userId(userId).readCnt(0L)
                 .regId(userId).regDt(DateUtil.getDateTime("yyyy-MM-dd hh:mm:ss"))
                 .chgId(userId).chgDt(DateUtil.getDateTime("yyyy-MM-dd hh:mm:ss"))
-                .build();
-
-        // 공지사항 저장하기
-        noticeRepository.save(pEntity);
-
-        // 서비스 종료 로그
-        log.info("{} insertNoticeInfo End!", this.getClass().getName());
-
+                .build(); // 공지사항 저장용 엔티티 생성
+        noticeRepository.save(pEntity); // 공지사항 저장
+        log.info("{} insertNoticeInfo End!", this.getClass().getName()); // 서비스 종료 로그
     }
+
+    // [추가 라우팅 및 퍼블릭 경로 설정 위치]
+    // 라우팅이나 공개 경로가 필요하다면, 관련 메서드를 이 위치에 추가할 수 있습니다.
 }
