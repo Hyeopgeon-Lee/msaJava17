@@ -71,7 +71,6 @@ public class NoticeEntity {
 
     /**
      * 공지글의 제목, 공지 여부, 내용을 변경합니다.
-     * 필요하면 검증/정규화/권한 체크까지 포함할 수 있습니다.
      *
      * @param title    변경할 제목
      * @param noticeYn 변경할 공지 여부
