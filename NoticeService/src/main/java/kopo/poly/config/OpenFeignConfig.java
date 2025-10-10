@@ -3,7 +3,6 @@ package kopo.poly.config;
 import feign.Logger;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +23,6 @@ public class OpenFeignConfig {
     // Authorization 헤더에 붙일 접두사(Bearer )
     private static final String HEADER_PREFIX = "Bearer ";
 
-    // application.yml에서 JWT AccessToken 쿠키 이름을 주입받음
     @Value("${jwt.token.access.name}")
     private String accessCookieName;   // 예: jwtAccessToken
 
@@ -55,17 +53,17 @@ public class OpenFeignConfig {
                 return;
             }
 
-            // 2) Authorization 헤더가 없으면, 쿠키에서 AccessToken을 찾아 Authorization 헤더로 승격합니다.
-            Cookie[] cookies = req.getCookies();
-            if (cookies != null) {
-                for (Cookie c : cookies) {
-                    // 쿠키 이름이 accessCookieName과 일치하고 값이 있으면 Authorization 헤더로 추가
-                    if (accessCookieName.equals(c.getName()) && StringUtils.hasText(c.getValue())) {
-                        tpl.header(HttpHeaders.AUTHORIZATION, HEADER_PREFIX + c.getValue());
-                        return;
-                    }
-                }
-            }
+//            // 2) Authorization 헤더가 없으면, 쿠키에서 AccessToken을 찾아 Authorization 헤더로 승격합니다.
+//            Cookie[] cookies = req.getCookies();
+//            if (cookies != null) {
+//                for (Cookie c : cookies) {
+//                    // 쿠키 이름이 accessCookieName과 일치하고 값이 있으면 Authorization 헤더로 추가
+//                    if (accessCookieName.equals(c.getName()) && StringUtils.hasText(c.getValue())) {
+//                        tpl.header(HttpHeaders.AUTHORIZATION, HEADER_PREFIX + c.getValue());
+//                        return;
+//                    }
+//                }
+//            }
         };
     }
 

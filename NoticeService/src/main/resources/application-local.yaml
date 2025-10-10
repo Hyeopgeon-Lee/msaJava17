@@ -1,18 +1,3 @@
-management:
-  endpoints:
-    web:
-      exposure:
-        include: '*'
-  endpoint:
-    health:
-      enabled: true
-      show-details: always
-    beans:
-      enabled: true
-    info:
-      enabled: true
-    shutdown:
-      enabled: true
 spring:
   jpa:
     generate-ddl: 'false'
@@ -42,9 +27,13 @@ server:
   port: 9002
 api:
   gateway-service: http://localhost:9001
-logging:
-  level:
-    feign: DEBUG
-    org.springframework.security: DEBUG   # (UserService에서 원인 메시지 확인용)
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,shutdown   # shutdown 노출
+  endpoint:
+    shutdown:
+      enabled: true                     # shutdown 활성화
 
