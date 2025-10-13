@@ -1,23 +1,6 @@
-management:
-  endpoints:
-    web:
-      exposure:
-        include: '*'
-  endpoint:
-    health:
-      enabled: true
-      show-details: always
-    beans:
-      enabled: true
-    info:
-      enabled: true
-    shutdown:
-      enabled: true
-
 spring:
   application:
     name: API-GATEWAY
-  # application.yml (ApiGateway)
   cloud:
     gateway:
       # (A) 모든 라우트 공통 필터
@@ -38,7 +21,8 @@ spring:
             exposedHeaders: [ "Location","Content-Disposition","Authorization" ]
             allowCredentials: true
             maxAge: 3600
-
+server:
+  port: '9000'
 
 jwt:
   token:
@@ -54,9 +38,6 @@ jwt:
   secret:
     key: '12345678123456781234567812345678123456781234'
 
-server:
-  port: '9000'
-
 api:
   server:
     user:
@@ -69,8 +50,11 @@ api:
       host: localhost
       port: 9002
 
-logging:
-  level:
-    org.springframework.security.oauth2.server.resource: DEBUG
-    org.springframework.cloud.gateway: INFO      # 필요 시 DEBUG로
-
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,shutdown   # shutdown 노출
+  endpoint:
+    shutdown:
+      enabled: true                     # shutdown 활성화

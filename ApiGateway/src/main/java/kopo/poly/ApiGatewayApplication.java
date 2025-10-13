@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.reactive.config.EnableWebFlux;
 
 @EnableWebFlux
-//@EnableDiscoveryClient
 @SpringBootApplication
 public class ApiGatewayApplication {
 

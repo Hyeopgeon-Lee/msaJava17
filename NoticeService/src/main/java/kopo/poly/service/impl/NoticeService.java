@@ -123,6 +123,4 @@ public class NoticeService implements INoticeService {
         log.info("{} insertNoticeInfo End!", this.getClass().getName()); // 서비스 종료 로그
     }
 
-    // [추가 라우팅 및 퍼블릭 경로 설정 위치]
-    // 라우팅이나 공개 경로가 필요하다면, 관련 메서드를 이 위치에 추가할 수 있습니다.
 }

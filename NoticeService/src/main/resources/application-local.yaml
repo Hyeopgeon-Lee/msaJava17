@@ -27,7 +27,7 @@ jwt:
     access:
       name: 'jwtAccessToken'
 api:
-  gateway-service: http://localhost:9001
+  gateway-service: http://localhost:9000
 
 management:
   endpoints:
