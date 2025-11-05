@@ -5,28 +5,25 @@
     <link rel="stylesheet" href="/css/table.css"/>
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
     <title>메인화면</title>
+    <script>
+        "use strict";
 
-    <script type="text/javascript">
-
-        // HTML로딩이 완료되고, 실행됨
-        $(document).ready(function () {
-
+        $(function () {
             // 공지사항
-            $("#btnNotice").on("click", function () { // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
+            $("#btnNotice").on("click", function () {
                 location.href = "/notice/noticeList.html";
-            })
+            });
 
             // 로그인
-            $("#btnLogin").on("click", function () { // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
+            $("#btnLogin").on("click", function () {
                 location.href = "/ss/login.html";
-            })
+            });
 
             // 회원가입
-            $("#btnReg").on("click", function () { // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
+            $("#btnReg").on("click", function () {
                 location.href = "/ss/userRegForm.html";
-            })
-        })
-
+            });
+        });
     </script>
 </head>
 <body>

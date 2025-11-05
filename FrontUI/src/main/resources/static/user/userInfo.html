@@ -6,45 +6,63 @@
     <link rel="stylesheet" href="/css/table.css"/>
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" src="/js/common.js"></script>
-    <script type="text/javascript"
-            src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
-    <script type="text/javascript">
+    <script>
+        "use strict";
 
-        // HTML로딩이 완료되고, 실행됨
-        $(document).ready(function () {
+        $(function () {
+            // 보호 페이지: 로그인 필수
+            requireLogin({
+                redirect: false, // 직접 next 파라미터를 붙여 이동
+                onAuthed: function (user) {
+                    // 인증 성공 → 사용자 정보 로드
+                    bindHandlers();
+                    loadUserInfo();
+                },
+                onUnauthed: function () {
+                    // 미인증 → 로그인 페이지로(next에 현재 페이지 경로 유지)
+                    goLoginWithNext();
+                }
+            });
+        });
 
-            // loginCheck(); // 로그인 여부 체크하기
+        /** 현재 페이지를 next로 달아서 로그인 페이지로 이동 */
+        function goLoginWithNext() {
+            const next = encodeURIComponent(location.pathname + location.search);
+            location.href = loginPage + "?next=" + next;
+        }
 
-            // 로그아웃
-            $("#btnLogout").on("click", function () { // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
-                document.location.href = "http://" + apiServer + "/user/v1/logout";
+        /** 버튼 등 이벤트 바인딩 */
+        function bindHandlers() {
+            $("#btnLogout").on("click", function () {
+                // 공통 apiUrl 사용: 프로토콜/호스트 일관성 유지
+                location.href = apiUrl("/user/v1/logout");
+            });
+        }
 
-            })
-
-            // 회원정보 상세 조회하기
+        /** 회원정보 조회 */
+        function loadUserInfo() {
             $.ajax({
                 url: apiUrl("/user/v1/userInfo"),
                 type: "POST",
-                contentType: "application/json; charset=UTF-8",
-                dataType: "json", // ★ 소문자 json
-                xhrFields: {withCredentials: true}
-            }).then(
-                function (json) { // 성공
-
-                    const result = json.data;
-
-                    $("#userId").append(result.userId);
-                    $("#userName").append(result.userName);
-                    $("#email").append(result.email);
-                    $("#addr1").append(result.addr1);
-                    $("#addr2").append(result.addr2);
-
-                }, function () { // 실패
-                    alert("접근 권한이 없습니다.");
-                    // location.href = loginPage;
-                }
-            );
-        })
+                // ajaxSetup에 의해 contentType/dataType/xhrFields 이미 세팅됨
+                data: JSON.stringify({}) // 서버가 JSON 바디를 기대하지 않아도 빈 객체는 안전
+            })
+                .done(function (res) {
+                    // 표준({status, message, data}) 또는 평면형 모두 대응
+                    const u = (res && res.data) ? res.data : (res || {});
+                    // 안전 출력(XSS 방지 및 중복 렌더 방지 위해 text 사용)
+                    $("#userId").text(u.userId || "");
+                    $("#userName").text(u.userName || "");
+                    $("#email").text(u.email || "");
+                    $("#addr1").text(u.addr1 || "");
+                    $("#addr2").text(u.addr2 || "");
+                })
+                .fail(function (xhr) {
+                    // 에러 메시지 안내 후 로그인 화면으로
+                    alert(extractErrorMessageFromXhr(xhr));
+                    goLoginWithNext();
+                });
+        }
     </script>
 </head>
 <body>

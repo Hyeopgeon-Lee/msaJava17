@@ -8,117 +8,101 @@
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" src="/js/jquery.serializeObject.min.js"></script>
     <script type="text/javascript" src="/js/common.js"></script>
-    <script type="text/javascript">
+    <style>
+        .btn--loading {
+            opacity: .6;
+            pointer-events: none;
+        }
+    </style>
+    <script>
+        "use strict";
 
-        // HTML로딩이 완료되고, 실행됨
-        $(document).ready(function () {
+        $(function () {
+            const f = document.getElementById("f");
 
-            let f = document.getElementById("f"); // form 태그
+            // Enter 키로 제출 지원
+            $("#f").on("keydown", function (e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    $("#btnSend").click();
+                }
+            });
 
-            // html의 btnSend id의 버튼 객체 가져오기
-            const btnSend = document.getElementById("btnSend");
+            // 회원가입 버튼
+            $("#btnSend").on("click", function () {
+                doSubmit(f);
+            });
 
-            // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
-            btnSend.addEventListener("click", e => {
-                doSubmit(f); // 회원가입하기
-            })
+            // 카카오 주소 찾기 버튼
+            $("#btnAddr").on("click", function () {
+                kakaoPost(f);
+            });
+        });
 
-            // html의 btnAddr id의 버튼 객체 가져오기
-            const btnAddr = document.getElementById("btnAddr"); // 카카오 주소 조회
+        // 포커스 + 경고 헬퍼
+        function warn(inputEl, message) {
+            alert(message);
+            inputEl.focus();
+            return false;
+        }
 
-            // 버튼 클릭했을때, 발생되는 이벤트 생성함(onclick 이벤트와 동일함)
-            btnAddr.addEventListener("click", e => {
-                kakaoPost(f); // 카카오 주소 조회하기
-            })
-
-        })
-
-        //회원가입 정보의 유효성 체크하기
+        // 회원가입 유효성 검사 + 제출
         function doSubmit(f) {
+            // 간단한 필수값 체크
+            if (!f.userId.value.trim()) return warn(f.userId, "아이디를 입력하세요.");
+            if (!f.userName.value.trim()) return warn(f.userName, "이름을 입력하세요.");
+            if (!f.password.value) return warn(f.password, "비밀번호를 입력하세요.");
+            if (!f.password2.value) return warn(f.password2, "비밀번호확인을 입력하세요.");
+            if (f.password.value !== f.password2.value) return warn(f.password2, "비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+            if (!f.email.value.trim()) return warn(f.email, "이메일을 입력하세요.");
+            if (!f.addr1.value.trim()) return warn(f.addr1, "주소를 입력하세요.");
+            if (!f.addr2.value.trim()) return warn(f.addr2, "상세주소를 입력하세요.");
 
-            if (f.userId.value === "") {
-                alert("아이디를 입력하세요.");
-                f.userId.focus();
-                return;
-            }
+            // (선택) 아주 기본적인 이메일 형식 점검
+            // const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.value.trim());
+            // if (!emailOk) return warn(f.email, "이메일 형식을 확인하세요.");
 
-            if (f.userName.value === "") {
-                alert("이름을 입력하세요.");
-                f.userName.focus();
-                return;
-            }
-
-            if (f.password.value === "") {
-                alert("비밀번호를 입력하세요.");
-                f.password.focus();
-                return;
-            }
-
-            if (f.password2.value === "") {
-                alert("비밀번호확인을 입력하세요.");
-                f.password2.focus();
-                return;
-            }
-
-            if (f.password.value !== f.password2.value) {
-                alert("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
-                f.password.focus();
-                return;
-            }
-
-            if (f.email.value === "") {
-                alert("이메일을 입력하세요.");
-                f.email.focus();
-                return;
-            }
-
-            if (f.addr1.value === "") {
-                alert("주소를 입력하세요.");
-                f.addr1.focus();
-                return;
-            }
-
-            if (f.addr2.value === "") {
-                alert("상세주소를 입력하세요.");
-                f.addr2.focus();
-                return;
-            }
+            // 중복 제출 방지
+            const $btn = $("#btnSend");
+            if ($btn.hasClass("btn--loading")) return;
+            $btn.addClass("btn--loading").val("처리 중...");
 
             $.ajax({
                 url: apiUrl("/reg/v1/insertUserInfo"),
                 type: "POST",
                 data: JSON.stringify($("#f").serializeObject())
+                // contentType/dataType/xhrFields는 common.js의 $.ajaxSetup 적용됨
             })
                 .done(function (json) {
-                    // ★ 서버 표준 포맷 {status, message, data:{result,msg}}
+                    // 표준 응답 해석
                     const ok = json?.status === 200 && json?.data?.result === 1;
                     const msg = json?.data?.msg || json?.message || "처리되었습니다.";
-
                     alert(msg);
-                    if (ok) location.href = "/ss/login.html";
+                    if (ok) {
+                        // 가입 성공 → 로그인 화면으로
+                        location.href = "/ss/login.html";
+                    }
                 })
                 .fail(function (jqXHR) {
                     alert(extractErrorMessageFromXhr(jqXHR));
+                })
+                .always(function () {
+                    $btn.removeClass("btn--loading").val("회원가입");
                 });
         }
 
+        // 카카오 우편번호
         function kakaoPost(f) {
             new daum.Postcode({
                 oncomplete: function (data) {
-
-                    // Kakao에서 제공하는 data는 JSON구조로 주소 조회 결과값을 전달함
-                    // 주요 결과값
-                    // 주소 : data.address
-                    // 우편번호 : data.zonecode
-                    let address = data.address; // 주소
-                    let zonecode = data.zonecode; // 우편번호
-                    f.addr1.value = "(" + zonecode + ")" + address
+                    const address = data.address || "";
+                    const zonecode = data.zonecode || "";
+                    f.addr1.value = (zonecode ? "(" + zonecode + ") " : "") + address;
+                    f.addr2.focus();
                 }
             }).open();
         }
     </script>
-
-
 </head>
 <body>
 <h2>회원 가입하기</h2>
