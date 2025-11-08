@@ -35,7 +35,7 @@
         function bindHandlers() {
             $("#btnLogout").on("click", function () {
                 // 공통 apiUrl 사용: 프로토콜/호스트 일관성 유지
-                location.href = apiUrl("/user/v1/logout");
+                location.href = apiUrl("/user/v1/logout/current");
             });
         }
 
@@ -95,7 +95,7 @@
 </div>
 <br/>
 <div>
-    <button id="btnLogout" type="button">로그아웃</button>
+    <button id="btnLogout" type="button">현재기기 로그아웃</button>
 </div>
 </body>
 </html>

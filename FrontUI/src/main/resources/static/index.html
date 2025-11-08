@@ -1,27 +1,73 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="/css/table.css"/>
-    <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+    <meta charset="UTF-8"/>
     <title>메인화면</title>
+    <link rel="stylesheet" href="/css/table.css"/>
+    <script src="/js/jquery-3.6.0.min.js"></script>
+    <script src="/js/common.js"></script>
+    <style>
+        /* 행 숨김/표시 토글용 */
+        .hidden {
+            display: none;
+        }
+    </style>
     <script>
         "use strict";
 
         $(function () {
+            // 기본: 모두 숨김 후 시작
+            $(".guest-only, .authed-only").addClass("hidden");
+
+            // 로그인 상태에 따라 행 토글
+            checkLoginSilently({
+                onAuthed: function (user) {
+                    $("#welcomeName").text(user.userName || user.userId || "");
+                    $(".authed-only").removeClass("hidden");
+                    $(".guest-only").addClass("hidden");
+                },
+                onUnauthed: function () {
+                    $(".guest-only").removeClass("hidden");
+                    $(".authed-only").addClass("hidden");
+                }
+            });
+
             // 공지사항
             $("#btnNotice").on("click", function () {
                 location.href = "/notice/noticeList.html";
             });
 
-            // 로그인
+            // 게스트용
             $("#btnLogin").on("click", function () {
                 location.href = "/ss/login.html";
             });
-
-            // 회원가입
             $("#btnReg").on("click", function () {
                 location.href = "/ss/userRegForm.html";
+            });
+
+            // 로그인 사용자용
+            $("#btnMyInfo").on("click", function () {
+                location.href = "/user/userInfo.html"; // 필요 시 경로 조정
+            });
+            $("#btnLogoutCurrent").on("click", function () {
+                $.ajax({
+                    url: apiUrl("/user/v1/logout/current"),
+                    type: "POST"
+                }).always(function () {
+                    location.href = "/index.html";
+                }).fail(function (jqXHR) {
+                    alert(extractErrorMessageFromXhr(jqXHR));
+                });
+            });
+            $("#btnLogoutAll").on("click", function () {
+                $.ajax({
+                    url: apiUrl("/user/v1/logout/all"),
+                    type: "POST"
+                }).always(function () {
+                    location.href = "/index.html";
+                }).fail(function (jqXHR) {
+                    alert(extractErrorMessageFromXhr(jqXHR));
+                });
             });
         });
     </script>
@@ -32,24 +78,51 @@
 <br/>
 <div class="divTable minimalistBlack">
     <div class="divTableBody">
+
+        <!-- 공통: 공지사항 -->
         <div class="divTableRow">
             <div class="divTableCell">공지사항 바로가기</div>
             <div class="divTableCell">
                 <button id="btnNotice" type="button">공지사항</button>
             </div>
         </div>
-        <div class="divTableRow">
+
+        <!-- ===== 로그인 사용자 전용 행들 ===== -->
+        <div class="divTableRow authed-only hidden">
+            <div class="divTableCell">환영합니다</div>
+            <div class="divTableCell"><span id="welcomeName"></span> 님</div>
+        </div>
+
+        <div class="divTableRow authed-only hidden">
+            <div class="divTableCell">내 정보</div>
+            <div class="divTableCell">
+                <button id="btnMyInfo" type="button">내 정보 보기</button>
+            </div>
+        </div>
+
+        <div class="divTableRow authed-only hidden">
+            <div class="divTableCell">로그아웃</div>
+            <div class="divTableCell">
+                <button id="btnLogoutCurrent" type="button">현재기기 로그아웃</button>
+                <button id="btnLogoutAll" type="button">모든기기 로그아웃</button>
+            </div>
+        </div>
+
+        <!-- ===== 비로그인(게스트) 전용 행들 ===== -->
+        <div class="divTableRow guest-only hidden">
             <div class="divTableCell">로그인하기</div>
             <div class="divTableCell">
                 <button id="btnLogin" type="button">로그인</button>
             </div>
         </div>
-        <div class="divTableRow">
+
+        <div class="divTableRow guest-only hidden">
             <div class="divTableCell">회원가입</div>
             <div class="divTableCell">
                 <button id="btnReg" type="button">회원가입</button>
             </div>
         </div>
+
     </div>
 </div>
 </body>
