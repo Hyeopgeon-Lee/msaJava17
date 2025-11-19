@@ -38,18 +38,18 @@ public class UserInfoEntity implements Serializable {
     private String userName; // 회원 이름(실명)
 
     @NonNull
-    @Column(name = "password", length = 1, nullable = false)
+    @Column(name = "password", length = 100, nullable = false)
     private String password; // 회원 비밀번호(암호화 저장 권장)
 
     @NonNull
-    @Column(name = "email", nullable = false)
+    @Column(name = "email", length = 200, nullable = false)
     private String email; // 회원 이메일 주소
 
     @NonNull
-    @Column(name = "addr1", nullable = false)
+    @Column(name = "addr1", length = 200, nullable = false)
     private String addr1; // 회원 기본 주소
 
-    @Column(name = "addr2", nullable = false)
+    @Column(name = "addr2", length = 500, nullable = false)
     private String addr2; // 회원 상세 주소
 
     @Column(name = "reg_id", updatable = false)
