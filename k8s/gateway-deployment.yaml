@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway-service-dep
+#  namespace: poly
+  labels:
+    app: gateway-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway-service
+      tier: backend
+  template:
+    metadata:
+      name: gateway-service
+      labels:
+        app: gateway-service
+        tier: backend
+    spec:
+      containers:
+        - name: gateway-service
+          image: docker.io/hyeopgeonlee/msa-gateway
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "50m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "k8s"
+          ports:
+            - containerPort: 9000  # 기본 서비스 포트
+      restartPolicy: Always

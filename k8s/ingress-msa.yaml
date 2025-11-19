@@ -1,0 +1,39 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-gateway-ing
+  namespace: kopo-trainee5
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "20m"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+
+  tls:
+    - hosts:
+        - api.k-bigdata.kr
+        - ui.k-bigdata.kr
+      secretName: k-bigdata-tls
+
+  rules:
+    - host: api.k-bigdata.kr
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway-service-svc
+                port:
+                  number: 9000
+    - host: ui.k-bigdata.kr
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ui-service-svc
+                port:
+                  number: 14000

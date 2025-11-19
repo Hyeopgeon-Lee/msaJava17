@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service-svc
+  #  namespace: poly
+  labels:
+    app: user-service
+spec:
+  selector:
+    app: user-service
+    tier: backend
+  ports:
+    - protocol: TCP
+      port: 9001  # 서비스의 포트
+      targetPort: 9001  # 컨테이너에서 사용되는 포트
+  type: ClusterIP
