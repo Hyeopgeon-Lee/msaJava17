@@ -1,0 +1,21 @@
+auth:
+  rootPassword: poly1234
+  username: poly
+  password: poly1234
+  database: myDB
+
+primary:
+  persistence:
+    enabled: true
+    size: 8Gi
+
+  resources:
+    limits:
+      memory: 1Gi
+      cpu: "1"
+    requests:
+      memory: 500Mi
+      cpu: "500m"
+
+  service:
+    type: ClusterIP

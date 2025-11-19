@@ -1,0 +1,26 @@
+architecture: standalone   # 단일 노드 구성 (복제 필요시 replication 으로 변경)
+
+auth:
+  enabled: true
+  username: poly
+  password: "1234"
+
+master:
+  service:
+    type: ClusterIP        # 외부 접근 불가, 클러스터 내부만 접근 가능
+    port: 6379
+  persistence:
+    enabled: true
+    size: 5Gi
+    # storageClass: "nks-block"   # (선택) 클러스터 환경에 맞게 지정
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# 필요시 metrics (Prometheus용)
+metrics:
+  enabled: false
