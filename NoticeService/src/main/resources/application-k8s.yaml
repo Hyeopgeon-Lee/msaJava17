@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: notice-service
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: poly
+    password: poly1234
+    url: jdbc:mariadb://my-mariadb:3306/myDB
+  jpa:
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100 #Fetch Join
+        format_sql: 'true'
+        use_sql_comments: 'true'
+    show-sql: 'true'
+    open-in-view: 'false'
+    generate-ddl: 'false'
+server:
+  port: 9002
+
+jwt:
+  token:
+    access:
+      name: 'jwtAccessToken'
+api:
+  gateway-service: http://gateway-service-svc:9000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,shutdown   # shutdown 노출
+  endpoint:
+    shutdown:
+      enabled: true                     # shutdown 활성화
+

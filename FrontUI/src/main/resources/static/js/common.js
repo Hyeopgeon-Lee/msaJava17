@@ -4,7 +4,8 @@
  * 기본 설정
  * ========================= */
 // apiServer: API Gateway 서버 주소를 지정합니다. 실제 서비스 환경에 맞게 변경할 수 있습니다.
-const apiServer = "localhost:9000";
+// const apiServer = "localhost:9000";
+const apiServer = "api.k-bigdata.kr";
 // loginPage: 인증이 필요한 페이지 접근 시 이동할 로그인 페이지 경로입니다.
 const loginPage = "/ss/login.html";
 

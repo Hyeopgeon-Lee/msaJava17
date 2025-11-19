@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: API-GATEWAY
+  cloud:
+    gateway:
+      # (A) 모든 라우트 공통 필터
+      default-filters:
+        # 혹시 남아도는 중복을 1개로 정리(게이트웨이가 붙인 첫 값 유지)
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin Access-Control-Expose-Headers, RETAIN_FIRST
+
+      # (B) 전역 CORS (게이트웨이 전담)
+      globalcors:
+        add-to-simple-url-handler-mapping: false
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "https://ui.k-bigdata.kr"
+              - "http://ui.k-bigdata.kr"
+            allowedMethods: [ "GET","POST","PUT","PATCH","DELETE","OPTIONS" ]
+            allowedHeaders: [ "*" ]
+            exposedHeaders: [ "Location","Content-Disposition","Authorization" ]
+            allowCredentials: true
+            maxAge: 3600
+server:
+  port: '9000'
+
+jwt:
+  token:
+    access:
+      valid:
+        time: '300'
+      name: jwtAccessToken
+    refresh:
+      valid:
+        time: '3000'
+      name: jwtRefreshToken
+  creator: poly
+  secret:
+    key: '12345678123456781234567812345678123456781234'
+
+api:
+  server:
+    user:
+      protocol: http
+      host: user-service-svc
+      port: 9001
+      refresh-endpoint: /login/v1/refresh
+    notice:
+      protocol: http
+      host: notice-service-svc
+      port: 9002
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,shutdown   # shutdown 노출
+  endpoint:
+    shutdown:
+      enabled: true                     # shutdown 활성화

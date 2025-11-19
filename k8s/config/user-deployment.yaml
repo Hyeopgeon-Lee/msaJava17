@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: user-service-dep
-  namespace: poly
+#  namespace: poly
   labels:
     app: user-service
 spec:

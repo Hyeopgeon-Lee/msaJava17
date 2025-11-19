@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
  * RouteConfig
  * -------------------------------------------------------------
  * 이 클래스는 Spring Cloud Gateway의 라우팅 설정을 담당합니다.
-
+ *
  * <p>
  * 주요 역할:
  * - 클라이언트의 요청 경로에 따라 뒷단 서비스(공지, 회원, 로그인 등)로 트래픽을 분배합니다.
@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
  * <p>
  * 라우팅이란?
  * - 사용자가 /notice/v1/** 경로로 요청하면 공지 서비스로,
- *   /user/** 경로로 요청하면 회원 서비스로 연결해주는 역할입니다.
+ * /user/** 경로로 요청하면 회원 서비스로 연결해주는 역할입니다.
  * - 마치 우체국에서 편지를 주소별로 분류해 각 지역으로 보내는 것과 비슷합니다.
  */
 @Slf4j
@@ -33,16 +33,20 @@ public class RouteConfig {
     // 공지(Notice) 서버 정보
     @Value("${api.server.notice.protocol:http}")
     private String noticeProtocol; // 공지 서비스의 프로토콜 (예: http)
-    @Value("${api.server.notice.url:localhost}")
+
+    @Value("${api.server.notice.host:localhost}")
     private String noticeHost;     // 공지 서비스의 호스트 주소
+
     @Value("${api.server.notice.port:9002}")
     private String noticePort;     // 공지 서비스의 포트 번호
 
     // 회원(User) 서버 정보
     @Value("${api.server.user.protocol:http}")
     private String userProtocol;   // 회원 서비스의 프로토콜 (예: http)
-    @Value("${api.server.user.url:localhost}")
+
+    @Value("${api.server.user.host:localhost}")
     private String userHost;       // 회원 서비스의 호스트 주소
+
     @Value("${api.server.user.port:9001}")
     private String userPort;       // 회원 서비스의 포트 번호
 
