@@ -135,6 +135,9 @@ public class RefreshTokenRedisService implements IRefreshTokenRedisService {
      */
     @Override
     public void revokeHandle(String handle) {
+        log.info("{}.revokeHandle Start!", getClass().getName());
+        log.info("revokeHandle :  {} ", handle);
+
         redis.delete(key(handle));
     }
 

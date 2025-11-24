@@ -34,8 +34,14 @@
         /** 버튼 등 이벤트 바인딩 */
         function bindHandlers() {
             $("#btnLogout").on("click", function () {
-                // 공통 apiUrl 사용: 프로토콜/호스트 일관성 유지
-                location.href = apiUrl("/user/v1/logout/current");
+                $.ajax({
+                    url: apiUrl("/user/v1/logout/current"),
+                    type: "POST"
+                }).always(function () {
+                    location.href = "/index.html";
+                }).fail(function (jqXHR) {
+                    alert(extractErrorMessageFromXhr(jqXHR));
+                });
             });
         }
 

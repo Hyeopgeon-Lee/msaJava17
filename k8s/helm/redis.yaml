@@ -2,7 +2,6 @@ architecture: standalone   # 단일 노드 구성 (복제 필요시 replication 
 
 auth:
   enabled: true
-  username: poly
   password: "1234"
 
 master:
@@ -24,3 +23,4 @@ master:
 # 필요시 metrics (Prometheus용)
 metrics:
   enabled: false
+
